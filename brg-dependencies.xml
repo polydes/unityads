@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dependencies>
     
-    <section>
+    <section if="ios">
         
-        <framework if="ios"
+        <framework
             name="UnityAds.framework"
             version="3.2.0"
             source="https://github.com/Unity-Technologies/unity-ads-ios/releases/download/3.2.0/UnityAds.framework.zip" />
