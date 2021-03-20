@@ -9,10 +9,10 @@ import openfl.Lib;
 #end
 
 #if android
-#if openfl_legacy
-import openfl.utils.JNI;
-#else
+#if (openfl >= "4.0.0")  
 import lime.system.JNI;
+#else
+import openfl.utils.JNI;
 #end
 #end
 
