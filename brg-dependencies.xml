@@ -5,8 +5,8 @@
         
         <framework
             name="UnityAds.framework"
-            version="3.2.0"
-            source="https://github.com/Unity-Technologies/unity-ads-ios/releases/download/3.2.0/UnityAds.framework.zip" />
+            version="3.5.1"
+            source="https://github.com/Unity-Technologies/unity-ads-ios/releases/download/3.5.1/UnityAds.framework.zip" />
         <ndll buildfile="project/build" output="project/ndll/iPhone"/>
 
     </section>

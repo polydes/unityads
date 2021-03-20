@@ -1,8 +1,8 @@
-name=UnityaAds
+name=UnityAds
 description=Implements UnityAds for iOS and Android.
 author=Robin Schaafsma
 website=http://www.byrobingames.com
-version=0.1.6
+version=0.2.0
 compatibility=mobile
 dependencies=toolset-com.byrobingames.manager-0.1.0
 repository=http://www.polydes.com/byrobingames
