@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
+    <source path="src" />
     
     <section if="android">
         <classpath name="src" />
@@ -17,8 +18,6 @@
         <echo value='|----------------------------------------------------------------------------|' />
         <echo value='| UnityAds: Enable byRobin Extension manager in "Setting->Extension"         |' />
         <echo value='|----------------------------------------------------------------------------|' />
-        
-		<ndll name="unityads" />
         
         <dependency path="frameworks/UnityAds.framework"/>
         <template path="templates" />

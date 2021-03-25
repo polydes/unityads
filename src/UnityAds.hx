@@ -22,6 +22,9 @@ import openfl.events.MouseEvent;
 
 import scripts.ByRobinAssets;
 
+#if ios
+@:buildXml('<include name="${haxelib:unityads}/project/Build.xml"/>')
+#end
 class UnityAds {
 
 	private static var initialized:Bool=false;
