@@ -15,7 +15,7 @@
 
 using namespace unityads;
 
-extern "C" void sendUnityAdsEvent(char* event);
+extern "C" void sendUnityAdsEvent(const char* event);
 
 @interface UnityAdsController : NSObject <UnityAdsDelegate, UnityAdsBannerDelegate>
 {
@@ -63,8 +63,9 @@ extern "C" void sendUnityAdsEvent(char* event);
     
     [UnityAds setDebugMode:debugMode];
     [UnityAdsBanner setDelegate:self];
-    [UnityAds initialize:ID delegate:self testMode:testMode];
-    
+    [UnityAds addDelegate:self];
+    [UnityAds initialize:ID testMode:testMode];
+
     return self;
 }
 
