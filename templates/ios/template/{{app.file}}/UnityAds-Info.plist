@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0">
+<dict>
+   <key>SKAdNetworkItems</key>
    <array>
       <dict>
          <!--  SPOTAD LTD  -->
@@ -222,4 +224,5 @@
          <string>238da6jt44.skadnetwork</string>
       </dict>
    </array>
+</dict>
 </plist>

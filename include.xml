@@ -21,5 +21,6 @@
 		<ndll name="unityads" />
         
         <dependency path="frameworks/UnityAds.framework"/>
+        <template path="templates" />
 	</section>
 </project>
