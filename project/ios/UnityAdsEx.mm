@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <UnityAds/UnityAds.h>
-#import <UnityAds/UADSBanner.h>
 #import <UnityAds/UADSMetaData.h>
 
 
@@ -17,11 +16,11 @@ using namespace unityads;
 
 extern "C" void sendUnityAdsEvent(const char* event);
 
-@interface UnityAdsController : NSObject <UnityAdsDelegate, UnityAdsBannerDelegate>
+@interface UnityAdsController : NSObject <UnityAdsDelegate, UADSBannerViewDelegate>
 {
     UIViewController *viewController;
     UIViewController *root;
-    UIView *bannerView;
+    UADSBannerView *bannerView;
     BOOL showedVideo;
     BOOL showedRewarded;
     BOOL bottom;
@@ -61,7 +60,6 @@ extern "C" void sendUnityAdsEvent(const char* event);
     if(!self) return nil;
     
     [UnityAds setDebugMode:debugMode];
-    [UnityAdsBanner setDelegate:self];
     [UnityAds addDelegate:self];
     [UnityAds initialize:ID testMode:testMode];
 
@@ -164,18 +162,23 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 -(void)showBannerAdWithPlacementID:(NSString*)bannerPlacentId
 {
-    if(bannerLoaded){
-        bannerView.hidden = false;
-        sendUnityAdsEvent("bannerdidshow");
-    }else{
-        [UnityAdsBanner loadBanner: bannerPlacentId];
+    if(!bannerLoaded){
+        if(bannerView){
+            bannerView.delegate = nil;
+        }
+        bannerView = [[UADSBannerView alloc] initWithPlacementId: bannerPlacentId size: CGSizeMake(320, 50)];
+        bannerView.delegate = self;
+        [bannerView load];
     }
 }
 
 -(void)hideBannerAd
 {
     if(bannerLoaded){
-        bannerView.hidden = true;
+        [bannerView removeFromSuperview];
+        bannerView = nil;
+        
+        bannerLoaded = NO;
         sendUnityAdsEvent("bannerdidhide");
     }
 }
@@ -277,43 +280,26 @@ extern "C" void sendUnityAdsEvent(const char* event);
     }
 }
 
-#pragma mark - UnityAdsBanner Delegate
+#pragma mark - UADSBannerViewDelegate
 
--(void)unityAdsBannerDidClick:(NSString *)placementId {
+-(void)bannerViewDidClick:(UADSBannerView *)bannerView {
     sendUnityAdsEvent("bannerdidclick");
 }
 
--(void)unityAdsBannerDidError:(NSString *)message {
-    NSLog(@"UnityAdsBannerDidError: %@", message);
+-(void)bannerViewDidError:(UADSBannerView *)bannerView error:(UADSBannerError *)error {
+    NSLog(@"UnityAdsBannerDidError: %@", [error localizedDescription]);
     bannerLoaded = NO;
     sendUnityAdsEvent("bannerdiderror");
 }
 
--(void)unityAdsBannerDidHide:(NSString *)placementId {
-     sendUnityAdsEvent("bannerdidhide");
-}
-
--(void)unityAdsBannerDidLoad:(NSString *)placementId view:(UIView *)view {
+-(void)bannerViewDidLoad:(UADSBannerView *)bannerView {
     
     root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
-    bannerView = view;
     [root.view addSubview:bannerView];
-    
-    bannerView.hidden = false;
-    
+
     bannerLoaded = YES;
-    
-    //sendUnityAdsEvent("bannerdidload");
-}
 
--(void)unityAdsBannerDidShow:(NSString *)placementId {
     sendUnityAdsEvent("bannerdidshow");
-}
-
--(void)unityAdsBannerDidUnload:(NSString *)placementId {
-    bannerLoaded = NO;
-    bannerView.hidden = true;
-    bannerView = nil;
 }
 
 @end
