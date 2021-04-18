@@ -38,7 +38,6 @@ extern "C" void sendUnityAdsEvent(const char* event);
 - (void)showBannerAdWithPlacementID:(NSString*)bannerPlacentId;
 - (void)hideBannerAd;
 - (void)setBannerPosition:(NSString*)position;
-- (void)destroyBannerAd;
 //- (void)setUsersConsent:(BOOL)isGranted;
 
 @property (nonatomic, assign) BOOL showedVideo;
@@ -178,13 +177,6 @@ extern "C" void sendUnityAdsEvent(const char* event);
     if(bannerLoaded){
         bannerView.hidden = true;
         sendUnityAdsEvent("bannerdidhide");
-    }
-}
-
--(void)destroyBannerAd
-{
-    if(bannerLoaded){
-        [UnityAdsBanner destroy];//app crashes when calling destroy using hidden for now..
     }
 }
 
@@ -392,11 +384,6 @@ namespace unityads {
         NSString *position = [NSString stringWithUTF8String:__position];
         
         if(unityAdsController != NULL) [unityAdsController setBannerPosition:position];
-    }
-    
-    void destroyBanner()
-    {
-        if(unityAdsController != NULL) [unityAdsController destroyBannerAd];
     }
     
     void setUnityConsent(bool isGranted)

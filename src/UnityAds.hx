@@ -56,7 +56,6 @@ class UnityAds {
   private static var __showBanner:String->Void = function(bannerPlacementId:String){};
 	private static var __hideBanner:Void->Void = function(){};
 	private static var __moveBanner:String->Void = function(position:String){};
-	//private static var __destroyBanner:Void->Void = function(){};
 	private static var __setConsent:Bool->Void = function(isGranted:Bool){};
 	private static var __getConsent:Void->Bool = function(){return false;};
 
@@ -86,7 +85,6 @@ class UnityAds {
 			__showBanner = cpp.Lib.load("unityads","unityads_banner_show",1);
 			__hideBanner = cpp.Lib.load("unityads","unityads_banner_hide",0);
 			__moveBanner = cpp.Lib.load("unityads","unityads_banner_move",1);
-			// __destroyBanner = cpp.Lib.load("unityads","unityads_banner_destroy",0);
 			__setConsent = cpp.Lib.load("unityads","unityads_setconsent",1);
 			__getConsent = cpp.Lib.load("unityads","unityads_getconsent",0);
 
@@ -110,7 +108,6 @@ class UnityAds {
 			__showBanner = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "showBanner", "(Ljava/lang/String;)V");
 			__hideBanner = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "hideBanner", "()V");
 			__moveBanner = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "moveBanner", "(Ljava/lang/String;)V");
-			// __destroyBanner = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "﻿destroyBanner", "()V");
 			__setConsent = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "setUsersConsent", "(Z)V");
 			__getConsent = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "getUsersConsent", "()Z");
 
@@ -180,14 +177,6 @@ class UnityAds {
 			trace("MoveBanner Exception: "+e);
 		}
 	}
-	//Game crash after using destroyBanner
-	/*public static function destroyBanner() {
-		try {
-			__destroyBanner();
-		} catch(e:Dynamic) {
-			trace("DestroyBanner Exception: "+e);
-		}
-	}*/
 
 	public static function setConsent(isGranted:Bool) {
 		try {

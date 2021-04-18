@@ -69,12 +69,6 @@ static value unityads_banner_move(value banner_position){
 }
 DEFINE_PRIM(unityads_banner_move,1);
 
-static value unityads_banner_destroy(){
-    destroyBanner();
-    return alloc_null();
-}
-DEFINE_PRIM(unityads_banner_destroy,0);
-
 static value unityads_setconsent(value isGranted){
     setUnityConsent(val_bool(isGranted));
     return alloc_null();
