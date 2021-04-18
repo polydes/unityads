@@ -21,6 +21,9 @@ extern "C" void sendUnityAdsEvent(const char* event);
     UIViewController *viewController;
     UIViewController *root;
     UADSBannerView *bannerView;
+    NSLayoutConstraint *bannerHorizontalConstraint;
+    NSLayoutConstraint *bannerVerticalConstraint;
+
     BOOL showedVideo;
     BOOL showedRewarded;
     BOOL bottom;
@@ -168,6 +171,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
         }
         bannerView = [[UADSBannerView alloc] initWithPlacementId: bannerPlacentId size: CGSizeMake(320, 50)];
         bannerView.delegate = self;
+        bannerView.translatesAutoresizingMaskIntoConstraints = NO;
         [bannerView load];
     }
 }
@@ -192,16 +196,93 @@ extern "C" void sendUnityAdsEvent(const char* event);
     
     if (bottom) // Reposition the adView to the bottom of the screen
     {
-        CGRect frame = bannerView.frame;
-        frame.origin.y = root.view.bounds.size.height - frame.size.height;
-        bannerView.frame=frame;
-        
+        if (@available(ios 11.0, *)) {
+            [self positionBannerViewAtBottomOfSafeArea];
+        } else {
+            [self positionBannerViewAtBottomOfView];
+        }
     }else // Reposition the adView to the top of the screen
     {
-        CGRect frame = bannerView.frame;
-        frame.origin.y = 0;
-        bannerView.frame=frame;
+        if (@available(ios 11.0, *)) {
+            [self positionBannerViewAtTopOfSafeArea];
+        } else {
+            [self positionBannerViewAtTopOfView];
+        }
     }
+}
+
+-(void)positionBannerViewAtTopOfSafeArea NS_AVAILABLE_IOS(11.0)
+{
+    // Position the banner. Stick it to the top of the Safe Area.
+    // Centered horizontally.
+    UILayoutGuide *guide = root.view.safeAreaLayoutGuide;
+    if(bannerHorizontalConstraint && bannerVerticalConstraint)
+    {
+        [NSLayoutConstraint deactivateConstraints:@[bannerHorizontalConstraint,bannerVerticalConstraint]];
+    }
+    bannerHorizontalConstraint=[bannerView.centerXAnchor constraintEqualToAnchor:guide.centerXAnchor];
+    bannerVerticalConstraint=[bannerView.topAnchor constraintEqualToAnchor:guide.topAnchor];
+    [NSLayoutConstraint activateConstraints:@[bannerHorizontalConstraint,bannerVerticalConstraint]];
+}
+
+-(void)positionBannerViewAtBottomOfSafeArea NS_AVAILABLE_IOS(11.0)
+{
+    // Position the banner. Stick it to the bottom of the Safe Area.
+    // Centered horizontally.
+    UILayoutGuide *guide = root.view.safeAreaLayoutGuide;
+    if(bannerHorizontalConstraint && bannerVerticalConstraint)
+    {
+        [NSLayoutConstraint deactivateConstraints:@[bannerHorizontalConstraint,bannerVerticalConstraint]];
+    }
+    bannerHorizontalConstraint=[bannerView.centerXAnchor constraintEqualToAnchor:guide.centerXAnchor];
+    bannerVerticalConstraint=[bannerView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor];
+    [NSLayoutConstraint activateConstraints:@[bannerHorizontalConstraint,bannerVerticalConstraint]];
+}
+
+-(void)positionBannerViewAtTopOfView
+{
+    if(bannerHorizontalConstraint && bannerVerticalConstraint)
+    {
+        [root.view removeConstraints:@[bannerHorizontalConstraint,bannerVerticalConstraint]];
+    }
+    bannerHorizontalConstraint=[NSLayoutConstraint constraintWithItem:bannerView
+                                                            attribute:NSLayoutAttributeCenterX
+                                                            relatedBy:NSLayoutRelationEqual
+                                                               toItem:root.view
+                                                            attribute:NSLayoutAttributeCenterX
+                                                           multiplier:1
+                                                             constant:0];
+    bannerVerticalConstraint=[NSLayoutConstraint constraintWithItem:bannerView
+                                                          attribute:NSLayoutAttributeTop
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:root.topLayoutGuide
+                                                          attribute:NSLayoutAttributeBottom
+                                                         multiplier:1
+                                                           constant:0];
+    [root.view addConstraints:@[bannerHorizontalConstraint,bannerVerticalConstraint]];
+}
+
+-(void)positionBannerViewAtBottomOfView
+{
+    if(bannerHorizontalConstraint && bannerVerticalConstraint)
+    {
+        [root.view removeConstraints:@[bannerHorizontalConstraint,bannerVerticalConstraint]];
+    }
+    bannerHorizontalConstraint=[NSLayoutConstraint constraintWithItem:bannerView
+                                                            attribute:NSLayoutAttributeCenterX
+                                                            relatedBy:NSLayoutRelationEqual
+                                                               toItem:root.view
+                                                            attribute:NSLayoutAttributeCenterX
+                                                           multiplier:1
+                                                             constant:0];
+    bannerVerticalConstraint=[NSLayoutConstraint constraintWithItem:bannerView
+                                                          attribute:NSLayoutAttributeBottom
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:root.bottomLayoutGuide
+                                                          attribute:NSLayoutAttributeTop
+                                                         multiplier:1
+                                                           constant:0];
+    [root.view addConstraints:@[bannerHorizontalConstraint,bannerVerticalConstraint]];
 }
     
 /*-(void)setUsersConsent:(BOOL)isGranted
@@ -298,6 +379,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
     [root.view addSubview:bannerView];
 
     bannerLoaded = YES;
+    [self setBannerPosition:@"TOP"];
 
     sendUnityAdsEvent("bannerdidshow");
 }
