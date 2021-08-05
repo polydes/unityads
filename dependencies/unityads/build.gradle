@@ -2,12 +2,6 @@ buildscript {
 	repositories {
 		mavenCentral()
 		google()
-		jcenter {
-		    content {
-		        // https://youtrack.jetbrains.com/issue/IDEA-261387
-		        includeModule("org.jetbrains.trove4j", "trove4j")
-		    }
-		}
 	}
 	
 	dependencies {
@@ -35,6 +29,6 @@ android {
 }
 
 dependencies {
-	implementation group: 'com.unity3d.ads', name: 'unity-ads', version: '3.5.1'
+	implementation group: 'com.unity3d.ads', name: 'unity-ads', version: '3.7.5'
 	implementation project(':deps:extension-api')
 }
