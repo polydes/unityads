@@ -23,7 +23,8 @@
   <depend files="${id}-dependencies" />
   <cache value="1" project="${id}" asLibrary="true" />
   <compilerflag value="-I${this_dir}/include" />
-  <compilerflag value="-F${this_dir}/../frameworks/" />
+  <compilerflag value="-F${this_dir}/../frameworks/UnityAds.xcframework/ios-arm64_i386_x86_64-simulator" if="simulator" />
+  <compilerflag value="-F${this_dir}/../frameworks/UnityAds.xcframework/ios-arm64_armv7" unless="simulator" />
   <file name="ios/UnityAdsEx.mm" />
 </files>
 

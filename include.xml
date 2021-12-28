@@ -10,7 +10,7 @@
 	<section if="ios">
         <setenv name="UNITYADS_ENABLED" value="true" />
         <set name="unityads" />
-        <dependency path="frameworks/UnityAds.framework"/>
+        <dependency path="frameworks/UnityAds.xcframework"/>
         <template path="templates" />
 	</section>
 </project>
