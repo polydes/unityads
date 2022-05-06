@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stencyl-addons>
+
+	<property-page-addon target="dashboard.sidebar">
+
+		<header label="UnityAds Settings"/>
+		
+		<field
+			name="enableUnityAds"
+			label="Enable Unity Ads" />
+
+		<field
+			name="iosAppId"
+			label="iOS Game ID"
+			editor="SingleLine" />
+
+		<field
+			name="androidAppId"
+			label="Android Game ID"
+			editor="SingleLine" />
+
+		<field
+			name="testAds"
+			label="Enable Test Ads" />
+
+		<field
+			name="debugMode"
+			label="Enable Debug Mode"
+			hint="Enable debug mode if you want debug logs." />
+
+	</property-page-addon>
+
+</stencyl-addons>

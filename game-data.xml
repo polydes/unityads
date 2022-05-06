@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<game-data>
+
+	<include>
+		<field name="enableUnityAds" type="boolean" default="true" />
+	</include>
+
+	<config classname="unityads.UnityAdsConfig">
+		<field name="testAds"      type="boolean" embedded="true" />
+		<field name="debugMode"    type="boolean" embedded="true" />
+		<field name="iosAppId"     type="text" embedded="true" />
+		<field name="androidAppId" type="text" embedded="true" />
+	</config>
+
+</game-data>

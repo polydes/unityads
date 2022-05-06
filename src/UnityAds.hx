@@ -20,8 +20,6 @@ import com.stencyl.Engine;
 import com.stencyl.Input;
 import openfl.events.MouseEvent;
 
-import scripts.ByRobinAssets;
-
 #if ios
 @:buildXml('<include name="${haxelib:unityads}/project/Build.xml"/>')
 #end
@@ -64,12 +62,12 @@ class UnityAds {
 	public static function init(){
 
 		#if ios
-		var appId:String = ByRobinAssets.UAIosGameID;
+		var appId:String = unityads.UnityAdsConfig.iosAppId;
 		#elseif android
-		var appId:String = ByRobinAssets.UAAndroidGameID;
+		var appId:String = unityads.UnityAdsConfig.androidAppId;
 		#end
-		var testMode:Bool = ByRobinAssets.UATestAds;
-		var debugMode:Bool = ByRobinAssets.UADebugMode;
+		var testMode:Bool = unityads.UnityAdsConfig.testAds;
+		var debugMode:Bool = unityads.UnityAdsConfig.debugMode;
 
 
 		#if ios

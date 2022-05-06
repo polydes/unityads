@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-    <source path="src" />
-    
-    <section if="android">
-        <dependency name="unityads" path="dependencies/unityads" if="android" />
-        <android extension="com.byrobin.unityads.UnityAdsEx" />
-    </section>
+    <section if="${enableUnityAds}">
+        <source path="src" />
+        
+        <section if="android">
+            <dependency name="unityads" path="dependencies/unityads" if="android" />
+            <android extension="com.byrobin.unityads.UnityAdsEx" />
+        </section>
 
-	<section if="ios">
-        <setenv name="UNITYADS_ENABLED" value="true" />
-        <set name="unityads" />
-        <config:ios>
-            <cocoapod name="UnityAds" version="3.7.5" />
-        </config:ios>
-        <template path="templates" />
-	</section>
+    	<section if="ios">
+            <config:ios>
+                <cocoapod name="UnityAds" version="3.7.5" />
+            </config:ios>
+            <template path="templates" />
+    	</section>
+    </section>
 </project>
