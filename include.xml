@@ -10,7 +10,9 @@
 	<section if="ios">
         <setenv name="UNITYADS_ENABLED" value="true" />
         <set name="unityads" />
-        <dependency path="frameworks/UnityAds.xcframework"/>
+        <config:ios>
+            <cocoapod name="UnityAds" version="3.7.5" />
+        </config:ios>
         <template path="templates" />
 	</section>
 </project>
