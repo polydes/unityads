@@ -48,6 +48,7 @@ public class UnityAdsEx extends Extension
     private static String appId = null;
     private static MetaData gdprMetaData = null;
 
+    private static boolean initialized = false;
     private static boolean showedVideo = false;
     private static boolean showedRewarded = false;
     private static boolean bannerLoaded = false;
@@ -77,6 +78,7 @@ public class UnityAdsEx extends Extension
                     @Override
                     public void onInitializationComplete()
                     {
+                        initialized = true;
                     }
 
                     @Override
@@ -91,6 +93,12 @@ public class UnityAdsEx extends Extension
 
     static public void showVideo(final String videoPlacementId)
     {
+        if (!initialized)
+        {
+            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            return;
+        }
+
         showedVideo = true;
         showedRewarded = false;
 
@@ -107,6 +115,12 @@ public class UnityAdsEx extends Extension
 
     static public void showRewarded(final String rewardPlacementId, final String title, final String msg)
     {
+        if (!initialized)
+        {
+            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            return;
+        }
+
         showedVideo = false;
         showedRewarded = true;
 
@@ -153,7 +167,7 @@ public class UnityAdsEx extends Extension
     @Deprecated
     public static boolean canShowUnityAds(final String placementId)
     {
-        return true;
+        return initialized;
     }
 
     public static boolean isSupportedUnityAds()
@@ -163,6 +177,12 @@ public class UnityAdsEx extends Extension
 
     static public void showBanner(final String bannerPlacementId)
     {
+        if (!initialized)
+        {
+            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            return;
+        }
+
         Extension.mainActivity.runOnUiThread(new Runnable()
         {
             public void run()
@@ -188,6 +208,12 @@ public class UnityAdsEx extends Extension
 
     static public void hideBanner()
     {
+        if (!initialized)
+        {
+            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            return;
+        }
+
         if (bannerLoaded)
         {
             Extension.mainActivity.runOnUiThread(new Runnable()
@@ -216,6 +242,12 @@ public class UnityAdsEx extends Extension
 
     static public void destroyBanner()
     {
+        if (!initialized)
+        {
+            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            return;
+        }
+
         Extension.mainActivity.runOnUiThread(new Runnable()
         {
             public void run()
@@ -227,6 +259,12 @@ public class UnityAdsEx extends Extension
 
     static public void moveBanner(final String position)
     {
+        if (!initialized)
+        {
+            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            return;
+        }
+
         Extension.mainActivity.runOnUiThread(new Runnable()
         {
             public void run()
