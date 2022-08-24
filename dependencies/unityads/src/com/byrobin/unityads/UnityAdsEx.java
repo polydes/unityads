@@ -59,6 +59,12 @@ public class UnityAdsEx extends Extension
         unityadsCallback = cb;
         UnityAdsEx.appId = appId;
 
+        if(appId.isEmpty())
+        {
+            Log.d("UnityAdsEx", "Failed to initialize because app ID hasn't been set.");
+            return;
+        }
+
         Extension.mainActivity.runOnUiThread(new Runnable()
         {
             public void run()
@@ -76,10 +82,6 @@ public class UnityAdsEx extends Extension
         showedRewarded = false;
 
         Log.d("UnityAdsEx", "Show Video Begin");
-        if (appId == "")
-        {
-            return;
-        }
         Extension.mainActivity.runOnUiThread(new Runnable()
         {
             public void run()
@@ -96,10 +98,6 @@ public class UnityAdsEx extends Extension
         showedRewarded = true;
 
         Log.d("UnityAdsEx", "Show Rewarded Begin");
-        if (appId == "")
-        {
-            return;
-        }
         Extension.mainActivity.runOnUiThread(new Runnable()
         {
             public void run()
