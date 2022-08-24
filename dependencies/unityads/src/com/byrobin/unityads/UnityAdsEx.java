@@ -35,6 +35,8 @@ import com.unity3d.services.banners.UnityBanners;
 
 public class UnityAdsEx extends Extension
 {
+    private static final String TAG = "UnityAdsEx";
+    
     private static UnityAdsEx _self = null;
     private static AdListener adListener = null;
     private static IUnityBannerListener bannerListener = null;
@@ -63,7 +65,7 @@ public class UnityAdsEx extends Extension
 
         if(appId.isEmpty())
         {
-            Log.d("UnityAdsEx", "Failed to initialize because app ID hasn't been set.");
+            Log.d(TAG, "Failed to initialize because app ID hasn't been set.");
             return;
         }
 
@@ -71,7 +73,7 @@ public class UnityAdsEx extends Extension
         {
             public void run()
             {
-                Log.d("UnityAdsEx", "Init UnityAds appId:" + appId);
+                Log.d(TAG, "Init UnityAds appId:" + appId);
                 UnityAds.setDebugMode(debugMode);
                 UnityAds.initialize(mainActivity, appId, testMode, new IUnityAdsInitializationListener()
                 {
@@ -84,7 +86,7 @@ public class UnityAdsEx extends Extension
                     @Override
                     public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message)
                     {
-                        Log.e("UnityAdsEx", message);
+                        Log.e(TAG, message);
                     }
                 });
             }
@@ -95,14 +97,14 @@ public class UnityAdsEx extends Extension
     {
         if (!initialized)
         {
-            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            Log.d(TAG, "UnityAds isn't initialized yet");
             return;
         }
 
         showedVideo = true;
         showedRewarded = false;
 
-        Log.d("UnityAdsEx", "Show Video Begin");
+        Log.d(TAG, "Show Video Begin");
         Extension.mainActivity.runOnUiThread(new Runnable()
         {
             public void run()
@@ -110,21 +112,21 @@ public class UnityAdsEx extends Extension
                 UnityAds.load(videoPlacementId, adListener);
             }
         });
-        Log.d("UnityAdsEx", "Show Video End ");
+        Log.d(TAG, "Show Video End ");
     }
 
     static public void showRewarded(final String rewardPlacementId, final String title, final String msg)
     {
         if (!initialized)
         {
-            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            Log.d(TAG, "UnityAds isn't initialized yet");
             return;
         }
 
         showedVideo = false;
         showedRewarded = true;
 
-        Log.d("UnityAdsEx", "Show Rewarded Begin");
+        Log.d(TAG, "Show Rewarded Begin");
         Extension.mainActivity.runOnUiThread(new Runnable()
         {
             public void run()
@@ -161,7 +163,7 @@ public class UnityAdsEx extends Extension
                 }
             }
         });
-        Log.d("UnityAdsEx", "Show Rewarded End ");
+        Log.d(TAG, "Show Rewarded End ");
     }
 
     @Deprecated
@@ -179,7 +181,7 @@ public class UnityAdsEx extends Extension
     {
         if (!initialized)
         {
-            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            Log.d(TAG, "UnityAds isn't initialized yet");
             return;
         }
 
@@ -210,7 +212,7 @@ public class UnityAdsEx extends Extension
     {
         if (!initialized)
         {
-            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            Log.d(TAG, "UnityAds isn't initialized yet");
             return;
         }
 
@@ -244,7 +246,7 @@ public class UnityAdsEx extends Extension
     {
         if (!initialized)
         {
-            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            Log.d(TAG, "UnityAds isn't initialized yet");
             return;
         }
 
@@ -261,7 +263,7 @@ public class UnityAdsEx extends Extension
     {
         if (!initialized)
         {
-            Log.d("UnityAdsEx", "UnityAds isn't initialized yet");
+            Log.d(TAG, "UnityAds isn't initialized yet");
             return;
         }
 
@@ -316,7 +318,7 @@ public class UnityAdsEx extends Extension
         SharedPreferences.Editor editor = mainActivity.getPreferences(Context.MODE_PRIVATE).edit();
         if (editor == null)
         {
-            Log.d("UnityAdsEx", "UnityAdsEx Failed to write user consent to preferences");
+            Log.d(TAG, "UnityAdsEx Failed to write user consent to preferences");
             return;
         }
 
@@ -325,7 +327,7 @@ public class UnityAdsEx extends Extension
 
         if (!committed)
         {
-            Log.d("UnityAdsEx", "UnityAdsEx Failed to write user consent to preferences");
+            Log.d(TAG, "UnityAdsEx Failed to write user consent to preferences");
         }
     }
 
@@ -334,12 +336,12 @@ public class UnityAdsEx extends Extension
         SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
         if (prefs == null)
         {
-            Log.i("UnityAdsEx", "UnityAdsEx Failed to read user conent preference data");
+            Log.i(TAG, "UnityAdsEx Failed to read user conent preference data");
         }
 
         final Boolean isGranted = prefs.getBoolean("gdpr_consent_unityads", false);
 
-        Log.d("UnityAdsEx", "UnityAdsEx get userConsent is: " + isGranted);
+        Log.d(TAG, "UnityAdsEx get userConsent is: " + isGranted);
 
         return isGranted;
     }
@@ -351,7 +353,7 @@ public class UnityAdsEx extends Extension
         @Override
         public void onUnityAdsAdLoaded(String placementId)
         {
-            Log.d("UnityAdsEx", "Fetch Completed ");
+            Log.d(TAG, "Fetch Completed ");
             unityadsCallback.call("onAdIsFetch", new Object[]{});
             UnityAds.show(mainActivity, placementId, this);
         }
@@ -359,7 +361,7 @@ public class UnityAdsEx extends Extension
         @Override
         public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message)
         {
-            Log.d("UnityAdsEx", "Fetch Failed ");
+            Log.d(TAG, "Fetch Failed ");
             unityadsCallback.call("onAdFailedToFetch", new Object[]{});
         }
 
