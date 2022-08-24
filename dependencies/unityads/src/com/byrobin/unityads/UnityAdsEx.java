@@ -31,11 +31,12 @@ import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBanners;
 
-public class UnityAdsEx extends Extension implements IUnityAdsListener, IUnityBannerListener {
+public class UnityAdsEx extends Extension implements IUnityAdsListener {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////
     private static UnityAdsEx _self = null;
+    private static IUnityBannerListener bannerListener = null;
     protected static HaxeObject unityadsCallback;
     
     //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +156,7 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener, IUnityBa
                         unityadsCallback.call("onBannerShow", new Object[] {});
 
                      }else{
-                        UnityBanners.setBannerListener (_self);
+                        UnityBanners.setBannerListener (bannerListener);
                         UnityBanners.loadBanner (mainActivity, bannerPlacementId);
 
                      }
@@ -316,52 +317,55 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener, IUnityBa
         }
         
     }
-///banner listener
-    @Override
-    public void onUnityBannerLoaded (String placementId, View view) {
-        _self.bannerView = view;
-        _self.layout = new LinearLayout(mainActivity);
-        _self.layout.setGravity(Gravity.BOTTOM);
 
-        mainActivity.addContentView(_self.layout, new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
-        _self.layout.addView(_self.bannerView);
-        _self.layout.bringToFront();
+    private class BannerListener implements IUnityBannerListener
+    {
+        @Override
+        public void onUnityBannerLoaded (String placementId, View view) {
+            _self.bannerView = view;
+            _self.layout = new LinearLayout(mainActivity);
+            _self.layout.setGravity(Gravity.BOTTOM);
 
-        moveBanner("BOTTOM");
-        _self.bannerView.setVisibility(View.VISIBLE);
+            mainActivity.addContentView(_self.layout, new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
+            _self.layout.addView(_self.bannerView);
+            _self.layout.bringToFront();
 
-        UnityAdsEx.bannerLoaded = true;
+            moveBanner("BOTTOM");
+            _self.bannerView.setVisibility(View.VISIBLE);
+
+            UnityAdsEx.bannerLoaded = true;
 
         }
 
-    @Override
-    public void onUnityBannerUnloaded (String placementId) {
-        UnityAdsEx.bannerLoaded = false;
-        _self.bannerView.setVisibility(View.GONE);
-        _self.bannerView = null;
+        @Override
+        public void onUnityBannerUnloaded (String placementId) {
+            UnityAdsEx.bannerLoaded = false;
+            _self.bannerView.setVisibility(View.GONE);
+            _self.bannerView = null;
 
-    }
+        }
 
-    @Override
-    public void onUnityBannerShow (String placementId) {
+        @Override
+        public void onUnityBannerShow (String placementId) {
 
-        unityadsCallback.call("onBannerShow", new Object[] {});
-    }
+            unityadsCallback.call("onBannerShow", new Object[] {});
+        }
 
-    @Override
-    public void onUnityBannerClick (String placementId) {
-        unityadsCallback.call("onBannerClick", new Object[] {});
-    }
+        @Override
+        public void onUnityBannerClick (String placementId) {
+            unityadsCallback.call("onBannerClick", new Object[] {});
+        }
 
-    @Override
-    public void onUnityBannerHide (String placementId) {
-        unityadsCallback.call("onBannerHide", new Object[] {});
-    }
+        @Override
+        public void onUnityBannerHide (String placementId) {
+            unityadsCallback.call("onBannerHide", new Object[] {});
+        }
 
-    @Override
-    public void onUnityBannerError (String message) {
-        UnityAdsEx.bannerLoaded = false;
-        unityadsCallback.call("onBannerError", new Object[] {});
+        @Override
+        public void onUnityBannerError (String message) {
+            UnityAdsEx.bannerLoaded = false;
+            unityadsCallback.call("onBannerError", new Object[] {});
+        }
     }
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -371,6 +375,7 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener, IUnityBa
     {
         super.onCreate(savedInstanceState);
         _self = this;
+        bannerListener = new BannerListener();
     }
     
     public void onResume () {
