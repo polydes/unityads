@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 
+import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
@@ -71,7 +72,19 @@ public class UnityAdsEx extends Extension
             {
                 Log.d("UnityAdsEx", "Init UnityAds appId:" + appId);
                 UnityAds.setDebugMode(debugMode);
-                UnityAds.initialize(mainActivity, appId, testMode);
+                UnityAds.initialize(mainActivity, appId, testMode, new IUnityAdsInitializationListener()
+                {
+                    @Override
+                    public void onInitializationComplete()
+                    {
+                    }
+
+                    @Override
+                    public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message)
+                    {
+                        Log.e("UnityAdsEx", message);
+                    }
+                });
             }
         });
     }
