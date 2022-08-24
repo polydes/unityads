@@ -36,7 +36,7 @@ import com.unity3d.services.banners.UnityBanners;
 public class UnityAdsEx extends Extension
 {
     private static final String TAG = "UnityAdsEx";
-    
+
     private static UnityAdsEx _self = null;
     private static AdListener adListener = null;
     private static IUnityBannerListener bannerListener = null;
@@ -58,6 +58,7 @@ public class UnityAdsEx extends Extension
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @SuppressWarnings("unused")
     static public void init(HaxeObject cb, final String appId, final boolean testMode, final boolean debugMode)
     {
         unityadsCallback = cb;
@@ -69,30 +70,27 @@ public class UnityAdsEx extends Extension
             return;
         }
 
-        Extension.mainActivity.runOnUiThread(new Runnable()
-        {
-            public void run()
+        Extension.mainActivity.runOnUiThread(() -> {
+            Log.d(TAG, "Init UnityAds appId:" + appId);
+            UnityAds.setDebugMode(debugMode);
+            UnityAds.initialize(mainActivity, appId, testMode, new IUnityAdsInitializationListener()
             {
-                Log.d(TAG, "Init UnityAds appId:" + appId);
-                UnityAds.setDebugMode(debugMode);
-                UnityAds.initialize(mainActivity, appId, testMode, new IUnityAdsInitializationListener()
+                @Override
+                public void onInitializationComplete()
                 {
-                    @Override
-                    public void onInitializationComplete()
-                    {
-                        initialized = true;
-                    }
+                    initialized = true;
+                }
 
-                    @Override
-                    public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message)
-                    {
-                        Log.e(TAG, message);
-                    }
-                });
-            }
+                @Override
+                public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message)
+                {
+                    Log.e(TAG, message);
+                }
+            });
         });
     }
 
+    @SuppressWarnings("unused")
     static public void showVideo(final String videoPlacementId)
     {
         if (!initialized)
@@ -105,16 +103,11 @@ public class UnityAdsEx extends Extension
         showedRewarded = false;
 
         Log.d(TAG, "Show Video Begin");
-        Extension.mainActivity.runOnUiThread(new Runnable()
-        {
-            public void run()
-            {
-                UnityAds.load(videoPlacementId, adListener);
-            }
-        });
+        Extension.mainActivity.runOnUiThread(() -> UnityAds.load(videoPlacementId, adListener));
         Log.d(TAG, "Show Video End ");
     }
 
+    @SuppressWarnings("unused")
     static public void showRewarded(final String rewardPlacementId, final String title, final String msg)
     {
         if (!initialized)
@@ -127,56 +120,44 @@ public class UnityAdsEx extends Extension
         showedRewarded = true;
 
         Log.d(TAG, "Show Rewarded Begin");
-        Extension.mainActivity.runOnUiThread(new Runnable()
-        {
-            public void run()
+        Extension.mainActivity.runOnUiThread(() -> {
+            if (title.length() > 0)
             {
-                if (title.length() > 0)
-                {
-                    Dialog dialog = new AlertDialog.Builder(mainActivity).setTitle(title).setMessage(msg).setPositiveButton
-                        (
-                            "Watch",
-                            new DialogInterface.OnClickListener()
-                            {
-                                public void onClick(DialogInterface dialog, int whichButton)
-                                {
-                                    UnityAds.load(rewardPlacementId, adListener);
-                                }
-                            }
-                        ).setNegativeButton
-                        (
-                            "Discard",
-                            new DialogInterface.OnClickListener()
-                            {
-                                public void onClick(DialogInterface dialog, int whichButton)
-                                {
-                                    //Do nothing go back to mainActivity
-                                }
-                            }
-                        ).create();
+                Dialog dialog = new AlertDialog.Builder(mainActivity)
+                    .setTitle(title)
+                    .setMessage(msg)
+                    .setPositiveButton("Watch", (dialog1, whichButton) ->
+                        UnityAds.load(rewardPlacementId, adListener)
+                    )
+                    .setNegativeButton("Discard", (dialog1, whichButton) -> {
+                            //Do nothing go back to mainActivity
+                    })
+                    .create();
 
-                    dialog.show();
-                }
-                else
-                {
-                    UnityAds.load(rewardPlacementId, adListener);
-                }
+                dialog.show();
+            }
+            else
+            {
+                UnityAds.load(rewardPlacementId, adListener);
             }
         });
         Log.d(TAG, "Show Rewarded End ");
     }
 
     @Deprecated
+    @SuppressWarnings("unused")
     public static boolean canShowUnityAds(final String placementId)
     {
         return initialized;
     }
 
+    @SuppressWarnings("unused")
     public static boolean isSupportedUnityAds()
     {
         return UnityAds.isSupported();
     }
 
+    @SuppressWarnings("unused")
     static public void showBanner(final String bannerPlacementId)
     {
         if (!initialized)
@@ -185,29 +166,26 @@ public class UnityAdsEx extends Extension
             return;
         }
 
-        Extension.mainActivity.runOnUiThread(new Runnable()
-        {
-            public void run()
+        Extension.mainActivity.runOnUiThread(() -> {
+            if (bannerLoaded)
             {
-                if (bannerLoaded)
-                {
-                    _self.bannerView.setVisibility(View.VISIBLE);
+                _self.bannerView.setVisibility(View.VISIBLE);
 
-                    Animation animation1 = new AlphaAnimation(0.0f, 1.0f);
-                    animation1.setDuration(1000);
-                    _self.layout.startAnimation(animation1);
+                Animation animation1 = new AlphaAnimation(0.0f, 1.0f);
+                animation1.setDuration(1000);
+                _self.layout.startAnimation(animation1);
 
-                    unityadsCallback.call("onBannerShow", new Object[]{});
-                }
-                else
-                {
-                    UnityBanners.setBannerListener(bannerListener);
-                    UnityBanners.loadBanner(mainActivity, bannerPlacementId);
-                }
+                unityadsCallback.call("onBannerShow", new Object[]{});
+            }
+            else
+            {
+                UnityBanners.setBannerListener(bannerListener);
+                UnityBanners.loadBanner(mainActivity, bannerPlacementId);
             }
         });
     }
 
+    @SuppressWarnings("unused")
     static public void hideBanner()
     {
         if (!initialized)
@@ -218,30 +196,22 @@ public class UnityAdsEx extends Extension
 
         if (bannerLoaded)
         {
-            Extension.mainActivity.runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    Animation animation1 = new AlphaAnimation(1.0f, 0.0f);
-                    animation1.setDuration(1000);
-                    _self.layout.startAnimation(animation1);
+            Extension.mainActivity.runOnUiThread(() -> {
+                Animation animation1 = new AlphaAnimation(1.0f, 0.0f);
+                animation1.setDuration(1000);
+                _self.layout.startAnimation(animation1);
 
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            _self.bannerView.setVisibility(View.GONE);
+                final Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    _self.bannerView.setVisibility(View.GONE);
 
-                            unityadsCallback.call("onBannerHide", new Object[]{});
-                        }
-                    }, 1000);
-                }
+                    unityadsCallback.call("onBannerHide", new Object[]{});
+                }, 1000);
             });
         }
     }
 
+    @SuppressWarnings("unused")
     static public void destroyBanner()
     {
         if (!initialized)
@@ -250,13 +220,7 @@ public class UnityAdsEx extends Extension
             return;
         }
 
-        Extension.mainActivity.runOnUiThread(new Runnable()
-        {
-            public void run()
-            {
-                UnityBanners.destroy();
-            }
-        });
+        Extension.mainActivity.runOnUiThread(UnityBanners::destroy);
     }
 
     static public void moveBanner(final String position)
@@ -267,39 +231,35 @@ public class UnityAdsEx extends Extension
             return;
         }
 
-        Extension.mainActivity.runOnUiThread(new Runnable()
-        {
-            public void run()
+        Extension.mainActivity.runOnUiThread(() -> {
+            if (position.equals("TOP"))
             {
-                if (position.equals("TOP"))
+                if (_self.bannerView == null)
                 {
-                    if (_self.bannerView == null)
-                    {
-                        UnityAdsEx.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-                    }
-                    else
-                    {
-                        UnityAdsEx.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-                        _self.layout.setGravity(gravity);
-                    }
+                    UnityAdsEx.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
                 }
                 else
                 {
-
-                    if (_self.bannerView == null)
-                    {
-                        UnityAdsEx.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-                    }
-                    else
-                    {
-                        UnityAdsEx.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-                        _self.layout.setGravity(gravity);
-                    }
+                    UnityAdsEx.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+                    _self.layout.setGravity(gravity);
+                }
+            }
+            else
+            {
+                if (_self.bannerView == null)
+                {
+                    UnityAdsEx.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+                }
+                else
+                {
+                    UnityAdsEx.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+                    _self.layout.setGravity(gravity);
                 }
             }
         });
     }
 
+    @SuppressWarnings("unused")
     static public void setUsersConsent(final boolean isGranted)
     {
         if (gdprMetaData == null)
@@ -331,6 +291,7 @@ public class UnityAdsEx extends Extension
         }
     }
 
+    @SuppressWarnings("unused")
     public static boolean getUsersConsent()
     {
         SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
@@ -340,7 +301,7 @@ public class UnityAdsEx extends Extension
             return false;
         }
 
-        final Boolean isGranted = prefs.getBoolean("gdpr_consent_unityads", false);
+        final boolean isGranted = prefs.getBoolean("gdpr_consent_unityads", false);
 
         Log.d(TAG, "UnityAdsEx get userConsent is: " + isGranted);
 
@@ -349,7 +310,7 @@ public class UnityAdsEx extends Extension
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private class AdListener implements IUnityAdsLoadListener, IUnityAdsShowListener
+    private static class AdListener implements IUnityAdsLoadListener, IUnityAdsShowListener
     {
         @Override
         public void onUnityAdsAdLoaded(String placementId)
@@ -413,7 +374,7 @@ public class UnityAdsEx extends Extension
         }
     }
 
-    private class BannerListener implements IUnityBannerListener
+    private static class BannerListener implements IUnityBannerListener
     {
         @Override
         public void onUnityBannerLoaded(String placementId, View view)
