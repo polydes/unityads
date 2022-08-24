@@ -24,16 +24,18 @@ import android.widget.LinearLayout;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 
-import com.unity3d.ads.IUnityAdsListener;
+import com.unity3d.ads.IUnityAdsLoadListener;
+import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.metadata.MetaData;
 
 import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBanners;
 
-public class UnityAdsEx extends Extension implements IUnityAdsListener
+public class UnityAdsEx extends Extension
 {
     private static UnityAdsEx _self = null;
+    private static AdListener adListener = null;
     private static IUnityBannerListener bannerListener = null;
     protected static HaxeObject unityadsCallback;
 
@@ -63,7 +65,7 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener
             {
                 Log.d("UnityAdsEx", "Init UnityAds appId:" + appId);
                 UnityAds.setDebugMode(debugMode);
-                UnityAds.initialize(mainActivity, appId, _self, testMode);
+                UnityAds.initialize(mainActivity, appId, testMode);
             }
         });
     }
@@ -82,7 +84,7 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener
         {
             public void run()
             {
-                UnityAds.show(mainActivity, videoPlacementId);
+                UnityAds.load(videoPlacementId, adListener);
             }
         });
         Log.d("UnityAdsEx", "Show Video End ");
@@ -111,7 +113,7 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener
                             {
                                 public void onClick(DialogInterface dialog, int whichButton)
                                 {
-                                    UnityAds.show(mainActivity, rewardPlacementId);
+                                    UnityAds.load(rewardPlacementId, adListener);
                                 }
                             }
                         ).setNegativeButton
@@ -130,7 +132,7 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener
                 }
                 else
                 {
-                    UnityAds.show(mainActivity, rewardPlacementId);
+                    UnityAds.load(rewardPlacementId, adListener);
                 }
             }
         });
@@ -294,53 +296,67 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Override
-    public void onUnityAdsReady(final String zoneId)
+    private class AdListener implements IUnityAdsLoadListener, IUnityAdsShowListener
     {
-        Log.d("UnityAdsEx", "Fetch Completed ");
-        unityadsCallback.call("onAdIsFetch", new Object[]{});
-    }
-
-    @Override
-    public void onUnityAdsError(UnityAds.UnityAdsError error, String message)
-    {
-        Log.d("UnityAdsEx", "Fetch Failed ");
-        unityadsCallback.call("onAdFailedToFetch", new Object[]{});
-    }
-
-    @Override
-    public void onUnityAdsStart(String zoneId)
-    {
-        if (showedVideo)
+        @Override
+        public void onUnityAdsAdLoaded(String placementId)
         {
-            unityadsCallback.call("onVideoDidShow", new Object[]{});
+            Log.d("UnityAdsEx", "Fetch Completed ");
+            unityadsCallback.call("onAdIsFetch", new Object[]{});
+            UnityAds.show(mainActivity, placementId, this);
         }
-        else if (showedRewarded)
-        {
-            unityadsCallback.call("onRewardedDidShow", new Object[]{});
-        }
-    }
 
-    @Override
-    public void onUnityAdsFinish(String zoneId, UnityAds.FinishState result)
-    {
-        switch (result)
+        @Override
+        public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message)
         {
-            case ERROR:
-                break;
-            case SKIPPED:
-                unityadsCallback.call("onVideoSkipped", new Object[]{});
-                break;
-            case COMPLETED:
-                if (showedVideo)
-                {
-                    unityadsCallback.call("onVideoCompleted", new Object[]{});
-                }
-                else if (showedRewarded)
-                {
-                    unityadsCallback.call("onRewardedCompleted", new Object[]{});
-                }
-                break;
+            Log.d("UnityAdsEx", "Fetch Failed ");
+            unityadsCallback.call("onAdFailedToFetch", new Object[]{});
+        }
+
+        @Override
+        public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error, String message)
+        {
+
+        }
+
+        @Override
+        public void onUnityAdsShowStart(String placementId)
+        {
+            if (showedVideo)
+            {
+                unityadsCallback.call("onVideoDidShow", new Object[]{});
+            }
+            else if (showedRewarded)
+            {
+                unityadsCallback.call("onRewardedDidShow", new Object[]{});
+            }
+        }
+
+        @Override
+        public void onUnityAdsShowClick(String placementId)
+        {
+
+        }
+
+        @Override
+        public void onUnityAdsShowComplete(String placementId, UnityAds.UnityAdsShowCompletionState state)
+        {
+            switch (state)
+            {
+                case SKIPPED:
+                    unityadsCallback.call("onVideoSkipped", new Object[]{});
+                    break;
+                case COMPLETED:
+                    if (showedVideo)
+                    {
+                        unityadsCallback.call("onVideoCompleted", new Object[]{});
+                    }
+                    else if (showedRewarded)
+                    {
+                        unityadsCallback.call("onRewardedCompleted", new Object[]{});
+                    }
+                    break;
+            }
         }
     }
 
@@ -403,6 +419,7 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener
     {
         super.onCreate(savedInstanceState);
         _self = this;
+        adListener = new AdListener();
         bannerListener = new BannerListener();
     }
 
