@@ -139,9 +139,10 @@ public class UnityAdsEx extends Extension
         Log.d("UnityAdsEx", "Show Rewarded End ");
     }
 
+    @Deprecated
     public static boolean canShowUnityAds(final String placementId)
     {
-        return UnityAds.isReady(placementId);
+        return true;
     }
 
     public static boolean isSupportedUnityAds()
