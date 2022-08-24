@@ -47,8 +47,8 @@ public class UnityAdsEx extends Extension
     private static String appId = null;
     private static MetaData gdprMetaData = null;
 
-    protected static boolean showedVideo = false;
-    protected static boolean showedRewarded = false;
+    private static boolean showedVideo = false;
+    private static boolean showedRewarded = false;
     private static boolean bannerLoaded = false;
     private static int gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
 
