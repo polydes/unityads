@@ -336,7 +336,8 @@ public class UnityAdsEx extends Extension
         SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
         if (prefs == null)
         {
-            Log.i(TAG, "UnityAdsEx Failed to read user conent preference data");
+            Log.i(TAG, "UnityAdsEx Failed to read user content preference data");
+            return false;
         }
 
         final Boolean isGranted = prefs.getBoolean("gdpr_consent_unityads", false);
