@@ -7,15 +7,12 @@
 
 package com.byrobin.unityads;
 
-
-import android.app.Activity;
 import android.app.*;
 import android.content.*;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.*;
 import android.util.Log;
-import android.content.ActivityNotFoundException;
 
 import android.view.Gravity;
 import android.view.animation.Animation;
@@ -23,21 +20,13 @@ import android.view.animation.AlphaAnimation;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
-import android.view.ViewGroup;
-
 
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 
 import com.unity3d.ads.IUnityAdsListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.log.DeviceLog;
-import com.unity3d.ads.metadata.MediationMetaData;
 import com.unity3d.ads.metadata.MetaData;
-import com.unity3d.ads.metadata.PlayerMetaData;
-import com.unity3d.services.core.misc.Utilities;
-import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.webview.WebView;
 
 import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBanners;
