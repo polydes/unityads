@@ -323,14 +323,14 @@ public class UnityAdsEx extends Extension
         @Override
         public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message)
         {
-            Log.d(TAG, "Fetch Failed ");
+            Log.d(TAG, "Fetch Failed: " + message);
             unityadsCallback.call("onAdFailedToFetch", new Object[]{});
         }
 
         @Override
         public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error, String message)
         {
-
+            Log.e(TAG, message);
         }
 
         @Override
