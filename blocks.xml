@@ -63,7 +63,7 @@
         </fields>
     </block>
 
-    <block tag="getAdInfoUnityAds" spec="UnityAds canShowAds with placementID: %0 [c:unityads]" code="UnityAds.canShowAds(~)" type="normal" color="charcoal" returns="boolean">
+    <block tag="getAdInfoUnityAds" spec="UnityAds canShowAds with placementID: %0 [c:unityads]" code="UnityAds.canShowAds(~)" type="normal" color="charcoal" returns="boolean" deprecated="true">
         <fields>
             <text order="0"></text>
         </fields>
