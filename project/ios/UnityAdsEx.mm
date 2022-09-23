@@ -18,7 +18,6 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 @interface UnityAdsController : NSObject <UnityAdsDelegate, UADSBannerViewDelegate>
 {
-    UIViewController *viewController;
     UIViewController *root;
     UADSBannerView *bannerView;
     NSLayoutConstraint *bannerHorizontalConstraint;
@@ -78,14 +77,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
     if ([UnityAds isReady:videoPlacementId]) {
             
         UIWindow* window = [UIApplication sharedApplication].keyWindow;
-        viewController = [[UIViewController alloc] init];
-        [window addSubview: viewController.view];
-        //[window.rootViewController presentViewController:viewController animated:YES completion:^(void)
-        //{
-         //   [UnityAds show:viewController placementId:videoPlacementId];
-        //}];
-        [UnityAds show:viewController placementId:videoPlacementId];
-        
+        [UnityAds show:window.rootViewController placementId:videoPlacementId];
     }
     
         
@@ -125,13 +117,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
                                    
                                          NSLog(@"UnityAds show start ");
                                          UIWindow* window = [UIApplication sharedApplication].keyWindow;
-                                         viewController = [[UIViewController alloc] init];
-                                         [window addSubview: viewController.view];
-                                         //[window.rootViewController presentViewController:viewController animated:YES completion:^(void)
-                                          //{
-                                          //    [UnityAds show:viewController placementId:rewardPlacementId];
-                                          //}];
-                                         [UnityAds show:viewController placementId:rewardPlacementId];
+                                         [UnityAds show:window.rootViewController placementId:rewardPlacementId];
                                      }];
         
             [alert addAction:discard];
@@ -142,13 +128,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
         
             NSLog(@"UnityAds show start ");
             UIWindow* window = [UIApplication sharedApplication].keyWindow;
-            viewController = [[UIViewController alloc] init];
-            [window addSubview: viewController.view];
-            //[window.rootViewController presentViewController:viewController animated:YES completion:^(void)
-            //{
-            //    [UnityAds show:viewController placementId:rewardPlacementId];
-            //}];
-            [UnityAds show:viewController placementId:rewardPlacementId];
+            [UnityAds show:window.rootViewController placementId:rewardPlacementId];
         }
     }
 }
@@ -325,13 +305,6 @@ extern "C" void sendUnityAdsEvent(const char* event);
 }
 
 - (void)unityAdsDidFinish:(NSString *)placementId withFinishState:(UnityAdsFinishState)state {
-    
-    [viewController dismissViewControllerAnimated:YES completion:^(void)
-     {
-         UIWindow *window = [UIApplication sharedApplication].keyWindow;
-         [viewController.view removeFromSuperview];
-         [window makeKeyAndVisible];
-     }];
     
     NSLog(@"unityAdsDidHide");
     /*if (showedVideo) {
