@@ -23,6 +23,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
     NSLayoutConstraint *bannerHorizontalConstraint;
     NSLayoutConstraint *bannerVerticalConstraint;
 
+    BOOL initialized;
     BOOL showedVideo;
     BOOL showedRewarded;
     BOOL bottom;
@@ -41,6 +42,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 - (void)setBannerPosition:(NSString*)position;
 //- (void)setUsersConsent:(BOOL)isGranted;
 
+@property (nonatomic, assign) BOOL initialized;
 @property (nonatomic, assign) BOOL showedVideo;
 @property (nonatomic, assign) BOOL showedRewarded;
 @property (nonatomic, assign) BOOL bottom;
@@ -50,6 +52,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 @implementation UnityAdsController
 
+@synthesize initialized;
 @synthesize showedVideo;
 @synthesize showedRewarded;
 @synthesize bottom;
@@ -70,6 +73,12 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (void)showVideoAdWithPlacementID:(NSString*)videoPlacementId
 {
+    if (!initialized)
+    {
+        NSLog(@"UnityAds isn't initialized yet");
+        return;
+    }
+
     showedVideo = YES;
     showedRewarded = NO;
     
@@ -79,6 +88,12 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (void)showRewardedAdWithPlacementID:(NSString*)rewardPlacementId andTitle:(NSString*)title withMsg:(NSString*)msg
 {
+    if (!initialized)
+    {
+        NSLog(@"UnityAds isn't initialized yet");
+        return;
+    }
+
     showedVideo = NO;
     showedRewarded = YES;
     
@@ -122,7 +137,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (BOOL)canShowUnityAds:(NSString*)placementId
 {
-    return YES;
+    return initialized;
 }
 
 - (BOOL)isSupportedUnityAds
@@ -132,6 +147,12 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 -(void)showBannerAdWithPlacementID:(NSString*)bannerPlacentId
 {
+    if (!initialized)
+    {
+        NSLog(@"UnityAds isn't initialized yet");
+        return;
+    }
+
     if(!bannerLoaded){
         if(bannerView){
             bannerView.delegate = nil;
@@ -145,6 +166,12 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 -(void)hideBannerAd
 {
+    if (!initialized)
+    {
+        NSLog(@"UnityAds isn't initialized yet");
+        return;
+    }
+
     if(bannerLoaded){
         [bannerView removeFromSuperview];
         bannerView = nil;
@@ -156,6 +183,12 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 -(void)setBannerPosition:(NSString*)position
 {
+    if (!initialized)
+    {
+        NSLog(@"UnityAds isn't initialized yet");
+        return;
+    }
+
     if(!root) return;
     if(!bannerLoaded) return;
     
@@ -273,7 +306,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 #pragma mark - UnityAdsInitializationDelegate
 
 - (void)initializationComplete {
-    
+    initialized = YES;
 }
 
 - (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
