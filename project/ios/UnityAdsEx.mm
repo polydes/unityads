@@ -16,7 +16,7 @@ using namespace unityads;
 
 extern "C" void sendUnityAdsEvent(const char* event);
 
-@interface UnityAdsController : NSObject <UnityAdsDelegate, UADSBannerViewDelegate>
+@interface UnityAdsController : NSObject <UnityAdsLoadDelegate, UnityAdsShowDelegate, UADSBannerViewDelegate>
 {
     UIViewController *root;
     UADSBannerView *bannerView;
@@ -62,7 +62,6 @@ extern "C" void sendUnityAdsEvent(const char* event);
     if(!self) return nil;
     
     [UnityAds setDebugMode:debugMode];
-    [UnityAds addDelegate:self];
     [UnityAds initialize:ID testMode:testMode];
 
     return self;
@@ -74,13 +73,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
     showedVideo = YES;
     showedRewarded = NO;
     
-    if ([UnityAds isReady:videoPlacementId]) {
-            
-        UIWindow* window = [UIApplication sharedApplication].keyWindow;
-        [UnityAds show:window.rootViewController placementId:videoPlacementId];
-    }
-    
-        
+    [UnityAds load:videoPlacementId loadDelegate:self];    
 }
 
 
@@ -89,53 +82,47 @@ extern "C" void sendUnityAdsEvent(const char* event);
     showedVideo = NO;
     showedRewarded = YES;
     
-    if ([UnityAds isReady:rewardPlacementId])
+    if ([title length] >0)
     {
+        UIAlertController* alert=   [UIAlertController
+                                      alertControllerWithTitle:title
+                                      message:msg
+                                      preferredStyle:UIAlertControllerStyleAlert];
     
-        if ([title length] >0)
-        {
-            UIAlertController* alert=   [UIAlertController
-                                          alertControllerWithTitle:title
-                                          message:msg
-                                          preferredStyle:UIAlertControllerStyleAlert];
-        
-            UIAlertAction* discard = [UIAlertAction
-                                      actionWithTitle:@"Discard"
-                                      style:UIAlertActionStyleDefault
-                                      handler:^(UIAlertAction * action)
-                                      {
-                                          [alert dismissViewControllerAnimated:YES completion:nil];
-                                          //nothing to do..
-                                      }];
-        
-            UIAlertAction* view =   [UIAlertAction
-                                     actionWithTitle:@"Watch"
-                                     style:UIAlertActionStyleDefault
-                                     handler:^(UIAlertAction * action)
-                                     {
-                                         [alert dismissViewControllerAnimated:YES completion:nil];
-                                   
-                                         NSLog(@"UnityAds show start ");
-                                         UIWindow* window = [UIApplication sharedApplication].keyWindow;
-                                         [UnityAds show:window.rootViewController placementId:rewardPlacementId];
-                                     }];
-        
-            [alert addAction:discard];
-            [alert addAction:view];
-        
-            [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:alert animated:YES completion:nil];
-        }else{
-        
-            NSLog(@"UnityAds show start ");
-            UIWindow* window = [UIApplication sharedApplication].keyWindow;
-            [UnityAds show:window.rootViewController placementId:rewardPlacementId];
-        }
+        UIAlertAction* discard = [UIAlertAction
+                                  actionWithTitle:@"Discard"
+                                  style:UIAlertActionStyleDefault
+                                  handler:^(UIAlertAction * action)
+                                  {
+                                      [alert dismissViewControllerAnimated:YES completion:nil];
+                                      //nothing to do..
+                                  }];
+    
+        UIAlertAction* view =   [UIAlertAction
+                                 actionWithTitle:@"Watch"
+                                 style:UIAlertActionStyleDefault
+                                 handler:^(UIAlertAction * action)
+                                 {
+                                     [alert dismissViewControllerAnimated:YES completion:nil];
+                               
+                                     NSLog(@"UnityAds show start ");
+                                     [UnityAds load:rewardPlacementId loadDelegate:self];
+                                 }];
+    
+        [alert addAction:discard];
+        [alert addAction:view];
+    
+        [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:alert animated:YES completion:nil];
+    }else{
+    
+        NSLog(@"UnityAds show start ");
+        [UnityAds load:rewardPlacementId loadDelegate:self];
     }
 }
 
 - (BOOL)canShowUnityAds:(NSString*)placementId
 {
-    return [UnityAds isReady: placementId];
+    return YES;
 }
 
 - (BOOL)isSupportedUnityAds
@@ -283,19 +270,24 @@ extern "C" void sendUnityAdsEvent(const char* event);
     [gdprConsentMetaData commit];
 }*/
 
-#pragma mark - UnityAdsSDK Delegate
+#pragma mark - UnityAdsLoadDelegate
 
-- (void)unityAdsReady:(NSString *)placementId {
+- (void)unityAdsAdLoaded:(NSString *)placementId {
     NSLog(@"unityAdsReady");
     sendUnityAdsEvent("adisfetch");
+    
+    UIWindow* window = [UIApplication sharedApplication].keyWindow;
+    [UnityAds show:window.rootViewController placementId:placementId showDelegate:self];
 }
 
-- (void)unityAdsDidError:(UnityAdsError)error withMessage:(NSString *)message {
+- (void)unityAdsAdFailedToLoad:(NSString *)placementId withError:(UnityAdsLoadError)error withMessage:(NSString *)message {
     NSLog(@"UnityAds ERROR: %ld - %@",(long)error, message);
     sendUnityAdsEvent("adfailedtofetch");
 }
 
-- (void)unityAdsDidStart:(NSString *)placementId {
+#pragma mark - UnityAdsShowDelegate
+
+- (void)unityAdsShowStart:(NSString *)placementId {
     NSLog(@"unityAdsDidShow");
     if (showedVideo) {
         sendUnityAdsEvent("videodidshow");
@@ -304,7 +296,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
     }
 }
 
-- (void)unityAdsDidFinish:(NSString *)placementId withFinishState:(UnityAdsFinishState)state {
+- (void)unityAdsShowComplete:(NSString *)placementId withFinishState:(UnityAdsShowCompletionState)state {
     
     NSLog(@"unityAdsDidHide");
     /*if (showedVideo) {
@@ -314,14 +306,11 @@ extern "C" void sendUnityAdsEvent(const char* event);
     }*/
     
     switch (state) {
-        case kUnityAdsFinishStateError:
-            //stateString = @"ERROR";
-            break;
-        case kUnityAdsFinishStateSkipped:
+        case kUnityShowCompletionStateSkipped:
             //stateString = @"SKIPPED";
             sendUnityAdsEvent("videoisskipped");
             break;
-        case kUnityAdsFinishStateCompleted:
+        case kUnityShowCompletionStateCompleted:
             //stateString = @"COMPLETED";
             if (showedVideo) {
                 sendUnityAdsEvent("videocompleted");
@@ -332,6 +321,14 @@ extern "C" void sendUnityAdsEvent(const char* event);
         default:
             break;
     }
+}
+
+- (void)unityAdsShowFailed: (NSString *)placementId withError:(UnityAdsShowError)error withMessage:(NSString *)message {
+    NSLog(@"UnityAds ERROR: %ld - %@",(long)error, message);
+}
+
+- (void)unityAdsShowClick: (NSString *)placementId {
+    
 }
 
 #pragma mark - UADSBannerViewDelegate
