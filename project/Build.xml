@@ -19,13 +19,13 @@
   <file name="common/ExternalInterface.cpp" />
 </files>
 
-<cocoapod name="UnityAds" version="3.7.5" />
+<cocoapod name="UnityAds" version="4.3.0" />
 
 <files id="${id}-ios" dir="${this_dir}">
   <depend files="${id}-dependencies" />
   <cache value="1" project="${id}" asLibrary="true" />
   <compilerflag value="-I${this_dir}/include" />
-  <compilerflag value="-F${cocoapod:UnityAds.frameworks.UnityAds.dir}" />
+  <compilerflag value="-F${cocoapod:UnityAds.frameworks.UnityAds.active_slice.dir}" />
   <file name="ios/UnityAdsEx.mm" />
 </files>
 

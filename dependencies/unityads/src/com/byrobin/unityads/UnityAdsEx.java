@@ -7,15 +7,12 @@
 
 package com.byrobin.unityads;
 
-
-import android.app.Activity;
 import android.app.*;
 import android.content.*;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.*;
 import android.util.Log;
-import android.content.ActivityNotFoundException;
 
 import android.view.Gravity;
 import android.view.animation.Animation;
@@ -23,231 +20,255 @@ import android.view.animation.AlphaAnimation;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
-import android.view.ViewGroup;
-
 
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 
-import com.unity3d.ads.IUnityAdsListener;
+import com.unity3d.ads.IUnityAdsInitializationListener;
+import com.unity3d.ads.IUnityAdsLoadListener;
+import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
-import com.unity3d.services.core.log.DeviceLog;
-import com.unity3d.ads.metadata.MediationMetaData;
 import com.unity3d.ads.metadata.MetaData;
-import com.unity3d.ads.metadata.PlayerMetaData;
-import com.unity3d.services.core.misc.Utilities;
-import com.unity3d.services.core.properties.SdkProperties;
-import com.unity3d.services.core.webview.WebView;
 
 import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBanners;
 
-public class UnityAdsEx extends Extension implements IUnityAdsListener, IUnityBannerListener {
+public class UnityAdsEx extends Extension
+{
+    private static final String TAG = "UnityAdsEx";
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////
     private static UnityAdsEx _self = null;
+    private static AdListener adListener = null;
+    private static IUnityBannerListener bannerListener = null;
     protected static HaxeObject unityadsCallback;
-    
+
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////
+
     private View bannerView;
     private LinearLayout layout;
 
-    private static String appId=null;
-    private static MetaData gdprMetaData=null;
-    
-    protected static boolean showedVideo=false;
-    protected static boolean showedRewarded=false;
-    private static boolean bannerLoaded=false;
-    private static int gravity=Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+    private static String appId = null;
+    private static MetaData gdprMetaData = null;
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////
+    private static boolean initialized = false;
+    private static boolean showedVideo = false;
+    private static boolean showedRewarded = false;
+    private static boolean bannerLoaded = false;
+    private static int gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
 
-    static public void init(HaxeObject cb, final String appId,final boolean testMode,final boolean debugMode){
-        
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @SuppressWarnings("unused")
+    static public void init(HaxeObject cb, final String appId, final boolean testMode, final boolean debugMode)
+    {
         unityadsCallback = cb;
-        UnityAdsEx.appId= appId;
-        
-		Extension.mainActivity.runOnUiThread(new Runnable() {
-                        public void run()
-			{
-                            Log.d("UnityAdsEx","Init UnityAds appId:" + appId);
-                            UnityAds.setDebugMode(debugMode);
-                            UnityAds.initialize(mainActivity, appId, _self, testMode);
-			}
-		});	
-	}
+        UnityAdsEx.appId = appId;
 
+        if(appId.isEmpty())
+        {
+            Log.d(TAG, "Failed to initialize because app ID hasn't been set.");
+            return;
+        }
+
+        Extension.mainActivity.runOnUiThread(() -> {
+            Log.d(TAG, "Init UnityAds appId:" + appId);
+            UnityAds.setDebugMode(debugMode);
+            UnityAds.initialize(mainActivity, appId, testMode, new IUnityAdsInitializationListener()
+            {
+                @Override
+                public void onInitializationComplete()
+                {
+                    initialized = true;
+                }
+
+                @Override
+                public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message)
+                {
+                    Log.e(TAG, message);
+                }
+            });
+        });
+    }
+
+    @SuppressWarnings("unused")
     static public void showVideo(final String videoPlacementId)
     {
+        if (!initialized)
+        {
+            Log.d(TAG, "UnityAds isn't initialized yet");
+            return;
+        }
+
         showedVideo = true;
         showedRewarded = false;
-        
-        Log.d("UnityAdsEx","Show Video Begin");
-                if(appId=="") return;
-		Extension.mainActivity.runOnUiThread(new Runnable() {
-                    public void run()
-                        {
-                            UnityAds.show(mainActivity, videoPlacementId);
-                        }
-                });
-		Log.d("UnityAdsEx","Show Video End ");
-	}
-    
+
+        Log.d(TAG, "Show Video Begin");
+        Extension.mainActivity.runOnUiThread(() -> UnityAds.load(videoPlacementId, adListener));
+        Log.d(TAG, "Show Video End ");
+    }
+
+    @SuppressWarnings("unused")
     static public void showRewarded(final String rewardPlacementId, final String title, final String msg)
     {
+        if (!initialized)
+        {
+            Log.d(TAG, "UnityAds isn't initialized yet");
+            return;
+        }
+
         showedVideo = false;
         showedRewarded = true;
-        
-        Log.d("UnityAdsEx","Show Rewarded Begin");
-        if(appId=="") return;
-        Extension.mainActivity.runOnUiThread(new Runnable() {
-            public void run()
+
+        Log.d(TAG, "Show Rewarded Begin");
+        Extension.mainActivity.runOnUiThread(() -> {
+            if (title.length() > 0)
             {
-                if(title.length() > 0)
-                {
-                    Dialog dialog = new AlertDialog.Builder(mainActivity).setTitle(title).setMessage(msg).  setPositiveButton
-                    (
-                    "Watch",
-                    new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
-                            UnityAds.show(mainActivity, rewardPlacementId);
-                        }
-                    }
-                    ).setNegativeButton
-                    (
-                    "Discard",
-                    new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
+                Dialog dialog = new AlertDialog.Builder(mainActivity)
+                    .setTitle(title)
+                    .setMessage(msg)
+                    .setPositiveButton("Watch", (dialog1, whichButton) ->
+                        UnityAds.load(rewardPlacementId, adListener)
+                    )
+                    .setNegativeButton("Discard", (dialog1, whichButton) -> {
                             //Do nothing go back to mainActivity
-                        }
-                    }
-                    ).create();
-                
-                    dialog.show();
-                }else{
-                   UnityAds.show(mainActivity, rewardPlacementId);
-                }
+                    })
+                    .create();
+
+                dialog.show();
+            }
+            else
+            {
+                UnityAds.load(rewardPlacementId, adListener);
             }
         });
-        Log.d("UnityAdsEx","Show Rewarded End ");
+        Log.d(TAG, "Show Rewarded End ");
     }
-    
-    public static boolean canShowUnityAds(final String placementId){
-        
-            return UnityAds.isReady(placementId);
 
+    @Deprecated
+    @SuppressWarnings("unused")
+    public static boolean canShowUnityAds(final String placementId)
+    {
+        return initialized;
     }
-    
-    public static boolean isSupportedUnityAds(){
-        
+
+    @SuppressWarnings("unused")
+    public static boolean isSupportedUnityAds()
+    {
         return UnityAds.isSupported();
     }
 
-    static public void showBanner(final String bannerPlacementId){
+    @SuppressWarnings("unused")
+    static public void showBanner(final String bannerPlacementId)
+    {
+        if (!initialized)
+        {
+            Log.d(TAG, "UnityAds isn't initialized yet");
+            return;
+        }
 
-        Extension.mainActivity.runOnUiThread(new Runnable() {
-                public void run() {
+        Extension.mainActivity.runOnUiThread(() -> {
+            if (bannerLoaded)
+            {
+                _self.bannerView.setVisibility(View.VISIBLE);
 
-                    if(bannerLoaded){
+                Animation animation1 = new AlphaAnimation(0.0f, 1.0f);
+                animation1.setDuration(1000);
+                _self.layout.startAnimation(animation1);
 
-                        _self.bannerView.setVisibility(View.VISIBLE);
-
-                        Animation animation1 = new AlphaAnimation(0.0f, 1.0f);
-                        animation1.setDuration(1000);
-                        _self.layout.startAnimation(animation1);
-
-                        unityadsCallback.call("onBannerShow", new Object[] {});
-
-                     }else{
-                        UnityBanners.setBannerListener (_self);
-                        UnityBanners.loadBanner (mainActivity, bannerPlacementId);
-
-                     }
-                }
+                unityadsCallback.call("onBannerShow", new Object[]{});
+            }
+            else
+            {
+                UnityBanners.setBannerListener(bannerListener);
+                UnityBanners.loadBanner(mainActivity, bannerPlacementId);
+            }
         });
-
     }
 
-    static public void hideBanner(){
+    @SuppressWarnings("unused")
+    static public void hideBanner()
+    {
+        if (!initialized)
+        {
+            Log.d(TAG, "UnityAds isn't initialized yet");
+            return;
+        }
 
-        if(bannerLoaded){
+        if (bannerLoaded)
+        {
+            Extension.mainActivity.runOnUiThread(() -> {
+                Animation animation1 = new AlphaAnimation(1.0f, 0.0f);
+                animation1.setDuration(1000);
+                _self.layout.startAnimation(animation1);
 
-            Extension.mainActivity.runOnUiThread(new Runnable() {
-                    public void run() {
-                        Animation animation1 = new AlphaAnimation(1.0f, 0.0f);
-                        animation1.setDuration(1000);
-                        _self.layout.startAnimation(animation1);
+                final Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    _self.bannerView.setVisibility(View.GONE);
 
-                        final Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                _self.bannerView.setVisibility(View.GONE);
-
-                                unityadsCallback.call("onBannerHide", new Object[] {});
-                            }
-                        }, 1000);
-
-
-                    }
+                    unityadsCallback.call("onBannerHide", new Object[]{});
+                }, 1000);
             });
         }
-
     }
 
-    static public void destroyBanner(){
-
-        Extension.mainActivity.runOnUiThread(new Runnable() {
-                public void run() {
-
-                    UnityBanners.destroy ();
-
-                }
-        });
-    }
-
-    static public void moveBanner(final String position){
-
-        Extension.mainActivity.runOnUiThread(new Runnable(){
-                public void run(){
-                    if(position.equals("TOP"))
-                    {
-                        if(_self.bannerView==null)
-                        {
-                                UnityAdsEx.gravity=Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-                        }else{
-                                UnityAdsEx.gravity=Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-                                _self.layout.setGravity(gravity);
-                        }
-                    }else{
-
-                        if(_self.bannerView ==null)
-                        {
-                            UnityAdsEx.gravity=Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-                        }else{
-                            UnityAdsEx.gravity=Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-                            _self.layout.setGravity(gravity);
-                        }
-                    }
-                }
-        });
-
-    }
-
-    static public void setUsersConsent(final boolean isGranted){
-
-        if(gdprMetaData == null){
-                gdprMetaData = new MetaData(mainActivity);
+    @SuppressWarnings("unused")
+    static public void destroyBanner()
+    {
+        if (!initialized)
+        {
+            Log.d(TAG, "UnityAds isn't initialized yet");
+            return;
         }
 
-        if(gdprMetaData.hasData()){
+        Extension.mainActivity.runOnUiThread(UnityBanners::destroy);
+    }
+
+    static public void moveBanner(final String position)
+    {
+        if (!initialized)
+        {
+            Log.d(TAG, "UnityAds isn't initialized yet");
+            return;
+        }
+
+        Extension.mainActivity.runOnUiThread(() -> {
+            if (position.equals("TOP"))
+            {
+                if (_self.bannerView == null)
+                {
+                    UnityAdsEx.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+                }
+                else
+                {
+                    UnityAdsEx.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+                    _self.layout.setGravity(gravity);
+                }
+            }
+            else
+            {
+                if (_self.bannerView == null)
+                {
+                    UnityAdsEx.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+                }
+                else
+                {
+                    UnityAdsEx.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+                    _self.layout.setGravity(gravity);
+                }
+            }
+        });
+    }
+
+    @SuppressWarnings("unused")
+    static public void setUsersConsent(final boolean isGranted)
+    {
+        if (gdprMetaData == null)
+        {
+            gdprMetaData = new MetaData(mainActivity);
+        }
+
+        if (gdprMetaData.hasData())
+        {
             gdprMetaData.clearData();
         }
 
@@ -255,138 +276,169 @@ public class UnityAdsEx extends Extension implements IUnityAdsListener, IUnityBa
         gdprMetaData.commit();
 
         SharedPreferences.Editor editor = mainActivity.getPreferences(Context.MODE_PRIVATE).edit();
-        if(editor == null) {
-                Log.d("UnityAdsEx", "UnityAdsEx Failed to write user consent to preferences");
-                return;
+        if (editor == null)
+        {
+            Log.d(TAG, "UnityAdsEx Failed to write user consent to preferences");
+            return;
         }
 
         editor.putBoolean("gdpr_consent_unityads", isGranted);
         boolean committed = editor.commit();
 
-        if(!committed) {
-                Log.d("UnityAdsEx", "UnityAdsEx Failed to write user consent to preferences");
+        if (!committed)
+        {
+            Log.d(TAG, "UnityAdsEx Failed to write user consent to preferences");
         }
     }
 
-    public static boolean getUsersConsent(){
-
+    @SuppressWarnings("unused")
+    public static boolean getUsersConsent()
+    {
         SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
-        if(prefs == null) {
-                Log.i("UnityAdsEx", "UnityAdsEx Failed to read user conent preference data");
+        if (prefs == null)
+        {
+            Log.i(TAG, "UnityAdsEx Failed to read user content preference data");
+            return false;
         }
 
-        final Boolean isGranted = prefs.getBoolean("gdpr_consent_unityads", false);
+        final boolean isGranted = prefs.getBoolean("gdpr_consent_unityads", false);
 
-        Log.d("UnityAdsEx","UnityAdsEx get userConsent is: " + isGranted);
+        Log.d(TAG, "UnityAdsEx get userConsent is: " + isGranted);
 
         return isGranted;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static class AdListener implements IUnityAdsLoadListener, IUnityAdsShowListener
+    {
+        @Override
+        public void onUnityAdsAdLoaded(String placementId)
+        {
+            Log.d(TAG, "Fetch Completed ");
+            unityadsCallback.call("onAdIsFetch", new Object[]{});
+            UnityAds.show(mainActivity, placementId, this);
+        }
+
+        @Override
+        public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message)
+        {
+            Log.d(TAG, "Fetch Failed: " + message);
+            unityadsCallback.call("onAdFailedToFetch", new Object[]{});
+        }
+
+        @Override
+        public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error, String message)
+        {
+            Log.e(TAG, message);
+        }
+
+        @Override
+        public void onUnityAdsShowStart(String placementId)
+        {
+            if (showedVideo)
+            {
+                unityadsCallback.call("onVideoDidShow", new Object[]{});
+            }
+            else if (showedRewarded)
+            {
+                unityadsCallback.call("onRewardedDidShow", new Object[]{});
+            }
+        }
+
+        @Override
+        public void onUnityAdsShowClick(String placementId)
+        {
+
+        }
+
+        @Override
+        public void onUnityAdsShowComplete(String placementId, UnityAds.UnityAdsShowCompletionState state)
+        {
+            switch (state)
+            {
+                case SKIPPED:
+                    unityadsCallback.call("onVideoSkipped", new Object[]{});
+                    break;
+                case COMPLETED:
+                    if (showedVideo)
+                    {
+                        unityadsCallback.call("onVideoCompleted", new Object[]{});
+                    }
+                    else if (showedRewarded)
+                    {
+                        unityadsCallback.call("onRewardedCompleted", new Object[]{});
+                    }
+                    break;
+            }
+        }
+    }
+
+    private static class BannerListener implements IUnityBannerListener
+    {
+        @Override
+        public void onUnityBannerLoaded(String placementId, View view)
+        {
+            _self.bannerView = view;
+            _self.layout = new LinearLayout(mainActivity);
+            _self.layout.setGravity(Gravity.BOTTOM);
+
+            mainActivity.addContentView(_self.layout, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+            _self.layout.addView(_self.bannerView);
+            _self.layout.bringToFront();
+
+            moveBanner("BOTTOM");
+            _self.bannerView.setVisibility(View.VISIBLE);
+
+            UnityAdsEx.bannerLoaded = true;
+        }
+
+        @Override
+        public void onUnityBannerUnloaded(String placementId)
+        {
+            UnityAdsEx.bannerLoaded = false;
+            _self.bannerView.setVisibility(View.GONE);
+            _self.bannerView = null;
+        }
+
+        @Override
+        public void onUnityBannerShow(String placementId)
+        {
+            unityadsCallback.call("onBannerShow", new Object[]{});
+        }
+
+        @Override
+        public void onUnityBannerClick(String placementId)
+        {
+            unityadsCallback.call("onBannerClick", new Object[]{});
+        }
+
+        @Override
+        public void onUnityBannerHide(String placementId)
+        {
+            unityadsCallback.call("onBannerHide", new Object[]{});
+        }
+
+        @Override
+        public void onUnityBannerError(String message)
+        {
+            UnityAdsEx.bannerLoaded = false;
+            unityadsCallback.call("onBannerError", new Object[]{});
+        }
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////////////////
-   @Override
-    public void onUnityAdsReady(final String zoneId) {
-        
-        Log.d("UnityAdsEx","Fetch Completed ");
-        unityadsCallback.call("onAdIsFetch", new Object[] {});
-    }
-    
-    @Override
-    public void onUnityAdsError(UnityAds.UnityAdsError error, String message) {
-        Log.d("UnityAdsEx","Fetch Failed ");
-        unityadsCallback.call("onAdFailedToFetch", new Object[] {});
-    }
-    
-    @Override
-    public void onUnityAdsStart(String zoneId) {
-    //public void onAdStarted(String zoneId) {
-        
-        if (showedVideo) {
-            unityadsCallback.call("onVideoDidShow", new Object[] {});
-        }else if (showedRewarded){
-            unityadsCallback.call("onRewardedDidShow", new Object[] {});
-        }
-    }
-    
-    @Override
-    public void onUnityAdsFinish(String zoneId, UnityAds.FinishState result) {
-        
-        switch(result){
-            case ERROR:
-                break;
-            case SKIPPED:
-                unityadsCallback.call("onVideoSkipped", new Object[] {});
-                break;
-            case COMPLETED:
-                if (showedVideo) {
-                    unityadsCallback.call("onVideoCompleted", new Object[] {});
-                }else if (showedRewarded){
-                    unityadsCallback.call("onRewardedCompleted", new Object[] {});
-                }
-                break;
-        }
-        
-    }
-///banner listener
-    @Override
-    public void onUnityBannerLoaded (String placementId, View view) {
-        _self.bannerView = view;
-        _self.layout = new LinearLayout(mainActivity);
-        _self.layout.setGravity(Gravity.BOTTOM);
 
-        mainActivity.addContentView(_self.layout, new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
-        _self.layout.addView(_self.bannerView);
-        _self.layout.bringToFront();
-
-        moveBanner("BOTTOM");
-        _self.bannerView.setVisibility(View.VISIBLE);
-
-        UnityAdsEx.bannerLoaded = true;
-
-        }
-
-    @Override
-    public void onUnityBannerUnloaded (String placementId) {
-        UnityAdsEx.bannerLoaded = false;
-        _self.bannerView.setVisibility(View.GONE);
-        _self.bannerView = null;
-
-    }
-
-    @Override
-    public void onUnityBannerShow (String placementId) {
-
-        unityadsCallback.call("onBannerShow", new Object[] {});
-    }
-
-    @Override
-    public void onUnityBannerClick (String placementId) {
-        unityadsCallback.call("onBannerClick", new Object[] {});
-    }
-
-    @Override
-    public void onUnityBannerHide (String placementId) {
-        unityadsCallback.call("onBannerHide", new Object[] {});
-    }
-
-    @Override
-    public void onUnityBannerError (String message) {
-        UnityAdsEx.bannerLoaded = false;
-        unityadsCallback.call("onBannerError", new Object[] {});
-    }
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void onCreate ( Bundle savedInstanceState )
+    public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         _self = this;
-    }
-    
-    public void onResume () {
-        super.onResume();
-        
+        adListener = new AdListener();
+        bannerListener = new BannerListener();
     }
 
+    public void onResume()
+    {
+        super.onResume();
+    }
 }
