@@ -16,7 +16,7 @@ using namespace unityads;
 
 extern "C" void sendUnityAdsEvent(const char* event);
 
-@interface UnityAdsController : NSObject <UnityAdsLoadDelegate, UnityAdsShowDelegate, UADSBannerViewDelegate>
+@interface UnityAdsController : NSObject <UnityAdsInitializationDelegate, UnityAdsLoadDelegate, UnityAdsShowDelegate, UADSBannerViewDelegate>
 {
     UIViewController *root;
     UADSBannerView *bannerView;
@@ -62,7 +62,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
     if(!self) return nil;
     
     [UnityAds setDebugMode:debugMode];
-    [UnityAds initialize:ID testMode:testMode];
+    [UnityAds initialize:ID testMode:testMode initializationDelegate:self];
 
     return self;
 }
@@ -269,6 +269,16 @@ extern "C" void sendUnityAdsEvent(const char* event);
     [gdprConsentMetaData set:@"gdpr.consent" value:@(isGranted)];
     [gdprConsentMetaData commit];
 }*/
+
+#pragma mark - UnityAdsInitializationDelegate
+
+- (void)initializationComplete {
+    
+}
+
+- (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
+    NSLog(@"UnityAds ERROR: %ld - %@",(long)error, message);
+}
 
 #pragma mark - UnityAdsLoadDelegate
 
