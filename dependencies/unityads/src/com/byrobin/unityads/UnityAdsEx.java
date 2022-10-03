@@ -358,7 +358,14 @@ public class UnityAdsEx extends Extension
             switch (state)
             {
                 case SKIPPED:
-                    unityadsCallback.call("onVideoSkipped", new Object[]{});
+                    if (showedVideo)
+                    {
+                        unityadsCallback.call("onVideoSkipped", new Object[]{});
+                    }
+                    else if (showedRewarded)
+                    {
+                        unityadsCallback.call("onRewardedSkipped", new Object[]{});
+                    }
                     break;
                 case COMPLETED:
                     if (showedVideo)

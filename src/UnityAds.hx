@@ -33,6 +33,7 @@ class UnityAds {
 	private static var _videoCompleted:Bool=false;
 	private static var _rewardedCompleted:Bool=false;
 	private static var _videoIsSkipped:Bool=false;
+	private static var _rewardedIsSkipped:Bool=false;
 	private static var _bannerDidClick:Bool=false;
 	private static var _bannerDidError:Bool=false;
 	private static var _bannerDidHide:Bool=false;
@@ -260,6 +261,16 @@ class UnityAds {
 		return false;
 	}
 
+	public static function rewardedIsSkipped():Bool{
+
+		if(_rewardedIsSkipped){
+			_rewardedIsSkipped = false;
+			return true;
+		}
+
+		return false;
+	}
+
 	public static function bannerDidClick():Bool{
 
 		if(_bannerDidClick){
@@ -344,6 +355,11 @@ class UnityAds {
 			trace("VIDEO IS SKIPPED");
 			_videoIsSkipped = true;
 		}
+		if(event == "rewardedisskipped")
+		{
+			trace("REWARDED IS SKIPPED");
+			_rewardedIsSkipped = true;
+		}
 		if(event == "bannerdidclick")
 		{
 			trace("BANNER DID CLICK");
@@ -398,6 +414,10 @@ class UnityAds {
 	public function onVideoSkipped()
 	{
 		_videoIsSkipped = true;
+	}
+	public function onRewardedSkipped()
+	{
+		_rewardedIsSkipped = true;
 	}
 	public function onBannerShow()
 	{

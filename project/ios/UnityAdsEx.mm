@@ -351,7 +351,11 @@ extern "C" void sendUnityAdsEvent(const char* event);
     switch (state) {
         case kUnityShowCompletionStateSkipped:
             //stateString = @"SKIPPED";
-            sendUnityAdsEvent("videoisskipped");
+            if (showedVideo) {
+                sendUnityAdsEvent("videoisskipped");
+            }else if (showedRewarded){
+                sendUnityAdsEvent("rewardedisskipped");
+            }
             break;
         case kUnityShowCompletionStateCompleted:
             //stateString = @"COMPLETED";
