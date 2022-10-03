@@ -316,7 +316,14 @@ public class UnityAdsEx extends Extension
         public void onUnityAdsAdLoaded(String placementId)
         {
             Log.d(TAG, "Fetch Completed ");
-            unityadsCallback.call("onAdIsFetch", new Object[]{});
+            if (showedVideo)
+            {
+                unityadsCallback.call("onVideoDidFetch", new Object[]{});
+            }
+            else if (showedRewarded)
+            {
+                unityadsCallback.call("onRewardedDidFetch", new Object[]{});
+            }
             UnityAds.show(mainActivity, placementId, this);
         }
 
@@ -324,13 +331,28 @@ public class UnityAdsEx extends Extension
         public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message)
         {
             Log.d(TAG, "Fetch Failed: " + message);
-            unityadsCallback.call("onAdFailedToFetch", new Object[]{});
+            if (showedVideo)
+            {
+                unityadsCallback.call("onVideoFailedToFetch", new Object[]{});
+            }
+            else if (showedRewarded)
+            {
+                unityadsCallback.call("onRewardedFailedToFetch", new Object[]{});
+            }
         }
 
         @Override
         public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error, String message)
         {
             Log.e(TAG, message);
+            if (showedVideo)
+            {
+                unityadsCallback.call("onVideoFailedToShow", new Object[]{});
+            }
+            else if (showedRewarded)
+            {
+                unityadsCallback.call("onRewardedFailedToShow", new Object[]{});
+            }
         }
 
         @Override
@@ -349,7 +371,14 @@ public class UnityAdsEx extends Extension
         @Override
         public void onUnityAdsShowClick(String placementId)
         {
-
+            if (showedVideo)
+            {
+                unityadsCallback.call("onVideoDidClick", new Object[]{});
+            }
+            else if (showedRewarded)
+            {
+                unityadsCallback.call("onRewardedDidClick", new Object[]{});
+            }
         }
 
         @Override

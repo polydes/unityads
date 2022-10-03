@@ -317,7 +317,11 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (void)unityAdsAdLoaded:(NSString *)placementId {
     NSLog(@"unityAdsReady");
-    sendUnityAdsEvent("adisfetch");
+    if (showedVideo) {
+        sendUnityAdsEvent("videodidfetch");
+    }else if (showedRewarded){
+        sendUnityAdsEvent("rewardeddidfetch");
+    }
     
     UIWindow* window = [UIApplication sharedApplication].keyWindow;
     [UnityAds show:window.rootViewController placementId:placementId showDelegate:self];
@@ -325,7 +329,11 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (void)unityAdsAdFailedToLoad:(NSString *)placementId withError:(UnityAdsLoadError)error withMessage:(NSString *)message {
     NSLog(@"UnityAds ERROR: %ld - %@",(long)error, message);
-    sendUnityAdsEvent("adfailedtofetch");
+    if (showedVideo) {
+        sendUnityAdsEvent("videofailedtofetch");
+    }else if (showedRewarded){
+        sendUnityAdsEvent("rewardedfailedtofetch");
+    }
 }
 
 #pragma mark - UnityAdsShowDelegate
@@ -372,10 +380,19 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (void)unityAdsShowFailed: (NSString *)placementId withError:(UnityAdsShowError)error withMessage:(NSString *)message {
     NSLog(@"UnityAds ERROR: %ld - %@",(long)error, message);
+    if (showedVideo) {
+        sendUnityAdsEvent("videofailedtoshow");
+    }else if (showedRewarded){
+        sendUnityAdsEvent("rewardedfailedtoshow");
+    }
 }
 
 - (void)unityAdsShowClick: (NSString *)placementId {
-    
+    if (showedVideo) {
+        sendUnityAdsEvent("videodidclick");
+    }else if (showedRewarded){
+        sendUnityAdsEvent("rewardeddidclick");
+    }
 }
 
 #pragma mark - UADSBannerViewDelegate

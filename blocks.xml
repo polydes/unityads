@@ -139,6 +139,10 @@
             <c text="did show"        code="AdDidShow" />
             <c text="is completed"    code="Completed" />
             <c text="is skipped"      code="IsSkipped" />
+            <c text="did click"       code="DidClick" />
+            <c text="failed to show"  code="AdFailedToShow" />
+            <c text="did load"        code="AdDidFetch" />
+            <c text="failed to load"  code="AdFailedToFetch" />
         </choices>
     </dropdown>
 

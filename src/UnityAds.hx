@@ -26,14 +26,22 @@ import openfl.events.MouseEvent;
 class UnityAds {
 
 	private static var initialized:Bool=false;
-	private static var _adIsFetch:Bool=false;
-	private static var _adFailedToFetch:Bool=false;
+	
+	private static var _videoAdDidFetch:Bool=false;
+	private static var _rewardedAdDidFetch:Bool=false;
+	private static var _videoAdFailedToFetch:Bool=false;
+	private static var _rewardedAdFailedToFetch:Bool=false;
 	private static var _videoAdDidShow:Bool=false;
 	private static var _rewardedAdDidShow:Bool=false;
+	private static var _videoAdFailedToShow:Bool=false;
+	private static var _rewardedAdFailedToShow:Bool=false;
 	private static var _videoCompleted:Bool=false;
 	private static var _rewardedCompleted:Bool=false;
 	private static var _videoIsSkipped:Bool=false;
 	private static var _rewardedIsSkipped:Bool=false;
+	private static var _videoDidClick:Bool=false;
+	private static var _rewardedDidClick:Bool=false;
+	
 	private static var _bannerDidClick:Bool=false;
 	private static var _bannerDidError:Bool=false;
 	private static var _bannerDidHide:Bool=false;
@@ -191,20 +199,40 @@ class UnityAds {
 	}
 
 	////callbacks funtions
-	public static function adIsFetch():Bool{
+	public static function videoAdDidFetch():Bool{
 
-		if(_adIsFetch){
-			_adIsFetch = false;
+		if(_videoAdDidFetch){
+			_videoAdDidFetch = false;
 			return true;
 		}
 
 		return false;
 	}
 
-	public static function adFailedToFetch():Bool{
+	public static function rewardedAdDidFetch():Bool{
 
-		if(_adFailedToFetch){
-			_adFailedToFetch = false;
+		if(_rewardedAdDidFetch){
+			_rewardedAdDidFetch = false;
+			return true;
+		}
+
+		return false;
+	}
+
+	public static function videoAdFailedToFetch():Bool{
+
+		if(_videoAdFailedToFetch){
+			_videoAdFailedToFetch = false;
+			return true;
+		}
+
+		return false;
+	}
+
+	public static function rewardedAdFailedToFetch():Bool{
+
+		if(_rewardedAdFailedToFetch){
+			_rewardedAdFailedToFetch = false;
 			return true;
 		}
 
@@ -225,6 +253,26 @@ class UnityAds {
 
 		if(_rewardedAdDidShow){
 			_rewardedAdDidShow = false;
+			return true;
+		}
+
+		return false;
+	}
+
+	public static function videoAdFailedToShow():Bool{
+
+		if(_videoAdFailedToShow){
+			_videoAdFailedToShow = false;
+			return true;
+		}
+
+		return false;
+	}
+
+	public static function rewardedAdFailedToShow():Bool{
+
+		if(_rewardedAdFailedToShow){
+			_rewardedAdFailedToShow = false;
 			return true;
 		}
 
@@ -265,6 +313,26 @@ class UnityAds {
 
 		if(_rewardedIsSkipped){
 			_rewardedIsSkipped = false;
+			return true;
+		}
+
+		return false;
+	}
+
+	public static function videoDidClick():Bool{
+
+		if(_videoDidClick){
+			_videoDidClick = false;
+			return true;
+		}
+
+		return false;
+	}
+
+	public static function rewardedDidClick():Bool{
+
+		if(_rewardedDidClick){
+			_rewardedDidClick = false;
 			return true;
 		}
 
@@ -320,15 +388,25 @@ class UnityAds {
 	{
 		var event:String = Std.string(Reflect.field(inEvent, "type"));
 
-		if(event == "adisfetch")
+		if(event == "videodidfetch")
 		{
-			trace("AD IS FETCH");
-			_adIsFetch = true;
+			trace("VIDEO DID FETCH");
+			_videoAdDidFetch = true;
 		}
-		if(event == "adfailedtofetch")
+		if(event == "rewardeddidfetch")
 		{
-			trace("AD FAILED TO FETCH");
-			_adFailedToFetch = true;
+			trace("REWARDED DID FETCH");
+			_rewardedAdDidFetch = true;
+		}
+		if(event == "videofailedtofetch")
+		{
+			trace("VIDEO FAILED TO FETCH");
+			_videoAdFailedToFetch = true;
+		}
+		if(event == "rewardedfailedtofetch")
+		{
+			trace("REWARDED FAILED TO FETCH");
+			_rewardedAdFailedToFetch = true;
 		}
 		if(event == "videodidshow")
 		{
@@ -339,6 +417,16 @@ class UnityAds {
 		{
 			trace("REWARDED DID SHOW");
 			_rewardedAdDidShow = true;
+		}
+		if(event == "videofailedtoshow")
+		{
+			trace("VIDEO FAILED TO SHOW");
+			_videoAdFailedToShow = true;
+		}
+		if(event == "rewardedfailedtoshow")
+		{
+			trace("REWARDED FAILED TO SHOW");
+			_rewardedAdFailedToShow = true;
 		}
 		if(event == "videocompleted")
 		{
@@ -359,6 +447,16 @@ class UnityAds {
 		{
 			trace("REWARDED IS SKIPPED");
 			_rewardedIsSkipped = true;
+		}
+		if(event == "videodidclick")
+		{
+			trace("VIDEO DID CLICK");
+			_videoDidClick = true;
+		}
+		if(event == "rewardeddidclick")
+		{
+			trace("REWARDED DID CLICK");
+			_rewardedDidClick = true;
 		}
 		if(event == "bannerdidclick")
 		{
@@ -387,13 +485,21 @@ class UnityAds {
 	#if android
 	private function new() {}
 
-	public function onAdIsFetch()
+	public function onVideoDidFetch()
 	{
-		_adIsFetch = true;
+		_videoAdDidFetch = true;
 	}
-	public function onAdFailedToFetch()
+	public function onRewardedDidFetch()
 	{
-		_adFailedToFetch = true;
+		_rewardedAdDidFetch = true;
+	}
+	public function onVideoFailedToFetch()
+	{
+		_videoAdFailedToFetch = true;
+	}
+	public function onRewardedFailedToFetch()
+	{
+		_rewardedAdFailedToFetch = true;
 	}
 	public function onVideoDidShow()
 	{
@@ -402,6 +508,14 @@ class UnityAds {
 	public function onRewardedDidShow()
 	{
 		_rewardedAdDidShow = true;
+	}
+	public function onVideoFailedToShow()
+	{
+		_videoAdFailedToShow = true;
+	}
+	public function onRewardedFailedToShow()
+	{
+		_rewardedAdFailedToShow = true;
 	}
 	public function onVideoCompleted()
 	{
@@ -418,6 +532,14 @@ class UnityAds {
 	public function onRewardedSkipped()
 	{
 		_rewardedIsSkipped = true;
+	}
+	public function onVideoDidClick()
+	{
+		_videoDidClick = true;
+	}
+	public function onRewardedDidClick()
+	{
+		_rewardedDidClick = true;
 	}
 	public function onBannerShow()
 	{
