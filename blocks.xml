@@ -134,40 +134,37 @@
         </fields>
     </block>
 
+    <dropdown id="unityads-ad-status">
+        <choices>
+            <c text="did show"        code="AdDidShow" />
+            <c text="is completed"    code="Completed" />
+            <c text="is skipped"      code="IsSkipped" />
+        </choices>
+    </dropdown>
+
     <block
         tag="getVideoAdInfoUnityAds"
         spec="video ad %0 [c:unityads]"
-        code="UnityAds.~()"
+        code="UnityAds.video~()"
         help="Each flag is reset only when queried. To simulate events, check each state you're interested in every game step."
         type="normal"
         color="charcoal"
         returns="boolean">
         <fields>
-            <dropdown order="0">
-                <choices>
-                    <c text="did show" code="videoAdDidShow"></c>
-                    <c text="is completed" code="videoCompleted"></c>
-                    <c text="is skipped" code="videoIsSkipped"></c>
-                </choices>
-            </dropdown>
+            <dropdown order="0" id="unityads-ad-status" />
         </fields>
     </block>
 
     <block
         tag="getRewardedAdInfoUnityAds"
         spec="rewarded video ad %0 [c:unityads]"
-        code="UnityAds.~()"
+        code="UnityAds.rewarded~()"
         help="Each flag is reset only when queried. To simulate events, check each state you're interested in every game step."
         type="normal"
         color="charcoal"
         returns="boolean">
         <fields>
-            <dropdown order="0">
-                <choices>
-                    <c text="did show" code="rewardedAdDidShow"></c>
-                    <c text="is completed" code="rewardedCompleted"></c>
-                </choices>
-            </dropdown>
+            <dropdown order="0" id="unityads-ad-status" />
         </fields>
     </block>
 
