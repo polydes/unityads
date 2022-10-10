@@ -22,12 +22,6 @@ extern "C" void sendUnityAdsEvent(const char* event);
     UADSBannerView *bannerView;
     NSLayoutConstraint *bannerHorizontalConstraint;
     NSLayoutConstraint *bannerVerticalConstraint;
-
-    BOOL initialized;
-    BOOL showedVideo;
-    BOOL showedRewarded;
-    BOOL bottom;
-    BOOL bannerLoaded;
     
     //UADSMetaData *gdprConsentMetaData;
 }
