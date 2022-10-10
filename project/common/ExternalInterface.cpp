@@ -29,6 +29,18 @@ static value unityads_init(value app_id, value testmode, value debugmode){
 }
 DEFINE_PRIM(unityads_init,3);
 
+static value unityads_video_load(value video_placementid){
+    loadVideo(val_string(video_placementid));
+    return alloc_null();
+}
+DEFINE_PRIM(unityads_video_load,1);
+
+static value unityads_rewarded_load(value rewarded_placementid){
+    loadRewarded(val_string(rewarded_placementid));
+    return alloc_null();
+}
+DEFINE_PRIM(unityads_rewarded_load,1);
+
 static value unityads_video_show(value video_placementid){
 	showVideo(val_string(video_placementid));
 	return alloc_null();

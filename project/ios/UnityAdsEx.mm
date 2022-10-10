@@ -41,6 +41,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 @property (nonatomic, assign) BOOL showedRewarded;
 @property (nonatomic, assign) BOOL bottom;
 @property (nonatomic, assign) BOOL bannerLoaded;
+@property (nonatomic, strong) NSMutableSet *loadedPlacements;
 
 @end
 
@@ -51,6 +52,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 @synthesize showedRewarded;
 @synthesize bottom;
 @synthesize bannerLoaded;
+@synthesize loadedPlacements;
 
 - (id)initWithID:(NSString*)ID testModeOn:(BOOL)testMode debugModeOn:(BOOL)debugMode
 {
@@ -58,10 +60,46 @@ extern "C" void sendUnityAdsEvent(const char* event);
     NSLog(@"UnityAds Init");
     if(!self) return nil;
     
+    loadedPlacements = [[NSMutableSet alloc] init];
+    
     [UnityAds setDebugMode:debugMode];
     [UnityAds initialize:ID testMode:testMode initializationDelegate:self];
 
     return self;
+}
+
+
+- (void)loadVideoAdWithPlacementID:(NSString*)videoPlacementId
+{
+    if (!initialized)
+    {
+        NSLog(@"UnityAds isn't initialized yet");
+        return;
+    }
+
+    showedVideo = YES;
+    showedRewarded = NO;
+    
+    [loadedPlacements removeObject:videoPlacementId];
+
+    [UnityAds load:videoPlacementId loadDelegate:self];    
+}
+
+
+- (void)loadRewardedAdWithPlacementID:(NSString*)rewardPlacementId
+{
+    if (!initialized)
+    {
+        NSLog(@"UnityAds isn't initialized yet");
+        return;
+    }
+
+    showedVideo = NO;
+    showedRewarded = YES;
+
+    [loadedPlacements removeObject:rewardPlacementId];
+    
+    [UnityAds load:rewardPlacementId loadDelegate:self];    
 }
 
 
@@ -76,7 +114,8 @@ extern "C" void sendUnityAdsEvent(const char* event);
     showedVideo = YES;
     showedRewarded = NO;
     
-    [UnityAds load:videoPlacementId loadDelegate:self];    
+    UIWindow* window = [UIApplication sharedApplication].keyWindow;
+    [UnityAds show:window.rootViewController placementId:videoPlacementId showDelegate:self];
 }
 
 
@@ -115,7 +154,8 @@ extern "C" void sendUnityAdsEvent(const char* event);
                                      [alert dismissViewControllerAnimated:YES completion:nil];
                                
                                      NSLog(@"UnityAds show start ");
-                                     [UnityAds load:rewardPlacementId loadDelegate:self];
+                                     UIWindow* window = [UIApplication sharedApplication].keyWindow;
+                                     [UnityAds show:window.rootViewController placementId:rewardPlacementId showDelegate:self];
                                  }];
     
         [alert addAction:discard];
@@ -125,13 +165,14 @@ extern "C" void sendUnityAdsEvent(const char* event);
     }else{
     
         NSLog(@"UnityAds show start ");
-        [UnityAds load:rewardPlacementId loadDelegate:self];
+        UIWindow* window = [UIApplication sharedApplication].keyWindow;
+        [UnityAds show:window.rootViewController placementId:rewardPlacementId showDelegate:self];
     }
 }
 
 - (BOOL)canShowUnityAds:(NSString*)placementId
 {
-    return initialized;
+    return [loadedPlacements containsObject:placementId];
 }
 
 - (BOOL)isSupportedUnityAds
@@ -311,18 +352,17 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (void)unityAdsAdLoaded:(NSString *)placementId {
     NSLog(@"unityAdsReady");
+    [loadedPlacements addObject:placementId];
     if (showedVideo) {
         sendUnityAdsEvent("videodidfetch");
     }else if (showedRewarded){
         sendUnityAdsEvent("rewardeddidfetch");
     }
-    
-    UIWindow* window = [UIApplication sharedApplication].keyWindow;
-    [UnityAds show:window.rootViewController placementId:placementId showDelegate:self];
 }
 
 - (void)unityAdsAdFailedToLoad:(NSString *)placementId withError:(UnityAdsLoadError)error withMessage:(NSString *)message {
     NSLog(@"UnityAds ERROR: %ld - %@",(long)error, message);
+    [loadedPlacements removeObject:placementId];
     if (showedVideo) {
         sendUnityAdsEvent("videofailedtofetch");
     }else if (showedRewarded){
@@ -334,6 +374,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (void)unityAdsShowStart:(NSString *)placementId {
     NSLog(@"unityAdsDidShow");
+    [loadedPlacements removeObject:placementId];
     if (showedVideo) {
         sendUnityAdsEvent("videodidshow");
     }else if (showedRewarded){
@@ -344,6 +385,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 - (void)unityAdsShowComplete:(NSString *)placementId withFinishState:(UnityAdsShowCompletionState)state {
     
     NSLog(@"unityAdsDidHide");
+    [loadedPlacements removeObject:placementId];
     /*if (showedVideo) {
         sendUnityAdsEvent("videoclosed");
     }else if (showedRewarded){
@@ -374,6 +416,7 @@ extern "C" void sendUnityAdsEvent(const char* event);
 
 - (void)unityAdsShowFailed: (NSString *)placementId withError:(UnityAdsShowError)error withMessage:(NSString *)message {
     NSLog(@"UnityAds ERROR: %ld - %@",(long)error, message);
+    [loadedPlacements removeObject:placementId];
     if (showedVideo) {
         sendUnityAdsEvent("videofailedtoshow");
     }else if (showedRewarded){
@@ -429,6 +472,20 @@ namespace unityads {
         NSString *appID = [NSString stringWithUTF8String:__appID];
 
         [unityAdsController initWithID:appID testModeOn:(BOOL)testMode debugModeOn:(BOOL)debugMode];
+    }
+    
+    void loadVideo(const char *__videoPlacementId)
+    {
+        NSString *videoPlacementId = [NSString stringWithUTF8String:__videoPlacementId];
+        
+        if(unityAdsController != NULL) [unityAdsController loadVideoAdWithPlacementID:videoPlacementId];
+    }
+    
+    void loadRewarded(const char *__rewardPlacementId)
+    {
+        NSString *rewardPlacementId = [NSString stringWithUTF8String:__rewardPlacementId];
+        
+        if(unityAdsController != NULL) [unityAdsController loadRewardedAdWithPlacementID:rewardPlacementId];
     }
     
     void showVideo(const char *__videoPlacementId)

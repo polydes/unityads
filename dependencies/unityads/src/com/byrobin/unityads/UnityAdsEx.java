@@ -33,6 +33,9 @@ import com.unity3d.ads.metadata.MetaData;
 import com.unity3d.services.banners.IUnityBannerListener;
 import com.unity3d.services.banners.UnityBanners;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class UnityAdsEx extends Extension
 {
     private static final String TAG = "UnityAdsEx";
@@ -55,6 +58,8 @@ public class UnityAdsEx extends Extension
     private static boolean showedRewarded = false;
     private static boolean bannerLoaded = false;
     private static int gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+
+    private static Set<String> loadedPlacements = new HashSet<>();
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -91,7 +96,7 @@ public class UnityAdsEx extends Extension
     }
 
     @SuppressWarnings("unused")
-    static public void showVideo(final String videoPlacementId)
+    static public void loadVideo(final String videoPlacementId)
     {
         if (!initialized)
         {
@@ -102,8 +107,41 @@ public class UnityAdsEx extends Extension
         showedVideo = true;
         showedRewarded = false;
 
-        Log.d(TAG, "Show Video Begin");
+        loadedPlacements.remove(videoPlacementId);
+
         Extension.mainActivity.runOnUiThread(() -> UnityAds.load(videoPlacementId, adListener));
+    }
+
+    @SuppressWarnings("unused")
+    static public void loadRewarded(final String rewardPlacementId)
+    {
+        if (!initialized)
+        {
+            Log.d(TAG, "UnityAds isn't initialized yet");
+            return;
+        }
+
+        showedVideo = false;
+        showedRewarded = true;
+
+        loadedPlacements.remove(rewardPlacementId);
+
+        Extension.mainActivity.runOnUiThread(() -> UnityAds.load(rewardPlacementId, adListener));
+    }
+
+    @SuppressWarnings("unused")
+    static public void showVideo(final String videoPlacementId)
+    {
+        if (!initialized)
+        {
+            Log.d(TAG, "UnityAds isn't initialized yet");
+            return;
+        }
+
+        showedVideo = true;
+        showedRewarded = false;
+        Log.d(TAG, "Show Video Begin");
+        Extension.mainActivity.runOnUiThread(() -> UnityAds.show(mainActivity, videoPlacementId, adListener));
         Log.d(TAG, "Show Video End ");
     }
 
@@ -127,7 +165,7 @@ public class UnityAdsEx extends Extension
                     .setTitle(title)
                     .setMessage(msg)
                     .setPositiveButton("Watch", (dialog1, whichButton) ->
-                        UnityAds.load(rewardPlacementId, adListener)
+                        UnityAds.show(mainActivity, rewardPlacementId, adListener)
                     )
                     .setNegativeButton("Discard", (dialog1, whichButton) -> {
                             //Do nothing go back to mainActivity
@@ -138,7 +176,7 @@ public class UnityAdsEx extends Extension
             }
             else
             {
-                UnityAds.load(rewardPlacementId, adListener);
+                UnityAds.show(mainActivity, rewardPlacementId, adListener);
             }
         });
         Log.d(TAG, "Show Rewarded End ");
@@ -148,7 +186,7 @@ public class UnityAdsEx extends Extension
     @SuppressWarnings("unused")
     public static boolean canShowUnityAds(final String placementId)
     {
-        return initialized;
+        return loadedPlacements.contains(placementId);
     }
 
     @SuppressWarnings("unused")
@@ -316,6 +354,7 @@ public class UnityAdsEx extends Extension
         public void onUnityAdsAdLoaded(String placementId)
         {
             Log.d(TAG, "Fetch Completed ");
+            loadedPlacements.add(placementId);
             if (showedVideo)
             {
                 unityadsCallback.call("onVideoDidFetch", new Object[]{});
@@ -324,13 +363,13 @@ public class UnityAdsEx extends Extension
             {
                 unityadsCallback.call("onRewardedDidFetch", new Object[]{});
             }
-            UnityAds.show(mainActivity, placementId, this);
         }
 
         @Override
         public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message)
         {
             Log.d(TAG, "Fetch Failed: " + message);
+            loadedPlacements.remove(placementId);
             if (showedVideo)
             {
                 unityadsCallback.call("onVideoFailedToFetch", new Object[]{});
@@ -345,6 +384,7 @@ public class UnityAdsEx extends Extension
         public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error, String message)
         {
             Log.e(TAG, message);
+            loadedPlacements.remove(placementId);
             if (showedVideo)
             {
                 unityadsCallback.call("onVideoFailedToShow", new Object[]{});
@@ -384,6 +424,7 @@ public class UnityAdsEx extends Extension
         @Override
         public void onUnityAdsShowComplete(String placementId, UnityAds.UnityAdsShowCompletionState state)
         {
+            loadedPlacements.remove(placementId);
             switch (state)
             {
                 case SKIPPED:

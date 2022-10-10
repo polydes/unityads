@@ -56,6 +56,8 @@ class UnityAds {
 	#if android
 	private static var __init:Dynamic;
 	#end
+	private static var __loadVideo:String->Void = function(videoPlacementId:String){};
+	private static var __loadRewarded:String->Void = function(rewardPlacementId:String){};
 	private static var __showVideo:String->Void = function(videoPlacementId:String){};
 	private static var __showRewarded:String->String->String->Void = function(rewardPlacementId:String,alertTitle:String,alertMSG:String){};
 	private static var __canShowAds:String->Bool = function(placementId:String):Bool {return false;};
@@ -85,6 +87,8 @@ class UnityAds {
 		try{
 			// CPP METHOD LINKING
 			__init = cpp.Lib.load("unityads","unityads_init",3);
+			__loadVideo = cpp.Lib.load("unityads","unityads_video_load",1);
+			__loadRewarded = cpp.Lib.load("unityads","unityads_rewarded_load",1);
 			__showVideo = cpp.Lib.load("unityads","unityads_video_show",1);
 			__showRewarded = cpp.Lib.load("unityads","unityads_rewarded_show",3);
 			__canShowAds = cpp.Lib.load("unityads","unityads_canshow",1);
@@ -108,6 +112,8 @@ class UnityAds {
 		initialized = true;
 		try{
 			// JNI METHOD LINKING
+			__loadVideo = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "loadVideo", "(Ljava/lang/String;)V");
+			__loadRewarded = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "loadRewarded", "(Ljava/lang/String;)V");
 			__showVideo = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "showVideo", "(Ljava/lang/String;)V");
 			__showRewarded = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "showRewarded", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 			__canShowAds = JNI.createStaticMethod("com/byrobin/unityads/UnityAdsEx", "canShowUnityAds", "(Ljava/lang/String;)Z");
@@ -133,6 +139,22 @@ class UnityAds {
 			trace("Android INIT Exception: "+e);
 		}
 		#end
+	}
+
+	public static function loadVideo(videoPlacementId:String) {
+		try {
+			__loadVideo(videoPlacementId);
+		} catch(e:Dynamic) {
+			trace("LoadVideo Exception: "+e);
+		}
+	}
+
+	public static function loadRewarded(rewardPlacementId:String) {
+		try {
+			__loadRewarded(rewardPlacementId);
+		} catch(e:Dynamic) {
+			trace("LoadRewardedVideo Exception: "+e);
+		}
 	}
 
 	public static function showVideo(videoPlacementId:String) {

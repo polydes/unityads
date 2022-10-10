@@ -6,6 +6,8 @@ namespace unityads {
 	
 	
 	void init(const char *__appID, bool testMode, bool debugMode);
+    void loadVideo(const char *__videoPlacementId);
+    void loadRewarded(const char *__rewardPlacementId);
 	void showVideo(const char *__videoPlacementId);
     void showRewarded(const char *__rewardPlacementId,const char *__title,const char *__msg);
     bool unityCanShow(const char *__placementId);

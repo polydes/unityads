@@ -13,6 +13,30 @@
     </block>
 
     <block
+        tag="loadVideoUnityAds"
+        spec="load video ad with ad unit id: %0 [c:unityads]"
+        code="UnityAds.loadVideo(~);"
+        type="action"
+        color="charcoal"
+        returns="void">
+        <fields>
+            <text order="0"></text>
+        </fields>
+    </block>
+
+    <block
+        tag="loadRewardedUnityAds"
+        spec="load rewarded ad with ad unit id: %0 [c:unityads]"
+        code="UnityAds.loadRewarded(~);"
+        type="action"
+        color="charcoal"
+        returns="void">
+        <fields>
+            <text order="0"></text>
+        </fields>
+    </block>
+
+    <block
         tag="showVideoUnityAds"
         spec="show video ad with ad unit id: %0 [c:unityads]"
         code="UnityAds.showVideo(~);"
@@ -127,8 +151,7 @@
         code="UnityAds.canShowAds(~)"
         type="normal"
         color="charcoal"
-        returns="boolean"
-        deprecated="true">
+        returns="boolean">
         <fields>
             <text order="0"></text>
         </fields>
