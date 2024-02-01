@@ -12,13 +12,6 @@
   <depend name="${this_dir}/include/UnityAdsEx.h" />
 </files>
 
-<files id="${id}-common" dir="${this_dir}">
-  <depend files="${id}-dependencies" />
-  <cache value="1" project="${id}" asLibrary="true" />
-  <compilerflag value="-I${this_dir}/include" />
-  <file name="common/ExternalInterface.cpp" />
-</files>
-
 <cocoapod name="UnityAds" version="4.3.0" />
 
 <files id="${id}-ios" dir="${this_dir}">
@@ -26,11 +19,11 @@
   <cache value="1" project="${id}" asLibrary="true" />
   <compilerflag value="-I${this_dir}/include" />
   <compilerflag value="-F${cocoapod:UnityAds.frameworks.UnityAds.active_slice.dir}" />
+  <file name="common/ExternalInterface.cpp" />
   <file name="ios/UnityAdsEx.mm" />
 </files>
 
 <target id="haxe">
-  <files id="com.byrobin.unityads-common" />
   <files id="com.byrobin.unityads-ios" if="ios" />
 </target>
 
