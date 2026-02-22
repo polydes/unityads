@@ -8,9 +8,9 @@
 #include <UnityAdsEx.h>
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <UnityAds/UnityAds.h>
 #import <UnityAds/UADSMetaData.h>
 
+@import UnityAds;
 
 using namespace unityads;
 

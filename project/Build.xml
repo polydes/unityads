@@ -12,13 +12,16 @@
   <depend name="${this_dir}/include/UnityAdsEx.h" />
 </files>
 
-<cocoapod name="UnityAds" version="4.3.0" />
+<cocoapod name="UnityAds" version="4.16.6" />
 
 <files id="${id}-ios" dir="${this_dir}">
   <depend files="${id}-dependencies" />
   <cache value="1" project="${id}" asLibrary="true" />
   <compilerflag value="-I${this_dir}/include" />
   <compilerflag value="-F${cocoapod:UnityAds.frameworks.UnityAds.active_slice.dir}" />
+  <compilerflag value="-fmodules" />
+  <compilerflag value="-fcxx-modules" />
+  <compilerflag value="-gmodules" />
   <file name="common/ExternalInterface.cpp" />
   <file name="ios/UnityAdsEx.mm" />
 </files>
