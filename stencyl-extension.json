@@ -1,0 +1,19 @@
+{
+  "group": "com.polydes.byrobin",
+  "id": "unityads",
+  "name": "UnityAds",
+  "description": "Implements UnityAds for iOS and Android.",
+  "tags": ["ads"],
+  "type": "game",
+  "author": "Robin Schaafsma",
+  "website": "https://www.polydes.com/byrobingames/engine/unityads",
+  "repository": "https://www.polydes.com/byrobingames",
+  "target": "stencyl-4.2.0",
+  "version": "0.5.0",
+
+  "icon": "icon.png",
+
+  "engine": {
+    "compatibility": "mobile"
+  }
+}

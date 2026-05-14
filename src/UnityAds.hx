@@ -21,7 +21,9 @@ import com.stencyl.Input;
 import openfl.events.MouseEvent;
 
 #if ios
-@:buildXml('<include name="${haxelib:unityads}/project/Build.xml"/>')
+@:buildXml('<include name="${haxelib:unityads}/project/build.xml"/>')
+//This is just here to prevent the otherwise indirectly referenced native code from being stripped at link time.
+@:cppFileCode('extern "C" int unityads_register_prims();void com_byrobin_unityads_link(){unityads_register_prims();}')
 #end
 class UnityAds {
 

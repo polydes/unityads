@@ -1,8 +1,0 @@
-name=UnityAds
-description=Implements UnityAds for iOS and Android.
-author=Robin Schaafsma
-website=http://www.byrobingames.com
-version=0.4.3
-compatibility=mobile
-dependencies=stencylbuild-12043
-repository=http://www.polydes.com/byrobingames
