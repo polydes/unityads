@@ -1,3 +1,7 @@
+# 0.5.1 (2026-11-01)
+
+- [ios] Updated Ad Network Identifiers
+
 # 0.5.0 (2026-05-27)
 
 - Fixes for Stencyl 4.2.0
